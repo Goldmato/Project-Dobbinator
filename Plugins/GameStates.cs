@@ -18,10 +18,8 @@ public static class GameStates
 
 	// Static private fields
 	private static int m_SecondsLeft;
-	private static int m_ScoreBreakpoint = SCORE_INTERVAL;
 
 	// Constants
-	const int SCORE_INTERVAL = 50;
 	const string GAME_OVER_SCENE = "GameOver";
 
 	public static IEnumerable MainMenu(MainMenu menu)
@@ -68,13 +66,25 @@ public static class GameStates
 			
 	}
 
-	public static IEnumerable MainGame(int startSeconds)
+	public static IEnumerable MainGame(int startSeconds, int minScore, int scoreBreakpoint, int scoreInterval)
 	{
 		m_SecondsLeft = startSeconds;
 		float secondBreakpoint = Time.timeSinceLevelLoad;
 
 		while(Running)
 		{
+			// Continue to next arena if minScore is reached
+			if(GameManager.Current.Score >= minScore)
+			{
+				break;
+			}
+
+			// End the game if the timer reaches 0
+			if(m_SecondsLeft <= 0)
+			{
+				UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+			}
+
 			// Check if a second has passed
 			if(Time.timeSinceLevelLoad >= secondBreakpoint)
 			{
@@ -86,20 +96,14 @@ public static class GameStates
 				}
 			}
 
-			// End the game if the timer reaches 0
-			if(m_SecondsLeft <= 0)
-			{
-				UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
-			}
-
-			if(GameManager.Current.Score >= m_ScoreBreakpoint)
+			if(GameManager.Current.Score >= scoreBreakpoint)
 			{
 				if(OnScoreBreakpoint != null)
 				{
 					// Debug.Log("OnScoreEvent() Called!");
 					OnScoreBreakpoint(GameManager.Current.Score);
 				}
-				m_ScoreBreakpoint += SCORE_INTERVAL;
+				scoreBreakpoint += scoreInterval;
 			}
 
 			yield return null;

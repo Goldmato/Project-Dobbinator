@@ -27,7 +27,8 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private GameObject m_Player;
 
 	FirstPersonController m_PlayerController;
-	GameObject  m_StartPlatform;
+	GameObject m_StartPlatform;
+	GameObject m_CurrentArena;
 	GameCanvas m_GameCanvas;
 
 	string m_LoadState;
@@ -35,6 +36,7 @@ public class GameManager : MonoBehaviour
 	float  m_StreakBonus;
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
+	int    m_MinScore = 50;
 	bool   m_TextIncrementing;
 
 	// Constants
@@ -74,7 +76,7 @@ public class GameManager : MonoBehaviour
 		}
 
 		// Set the initial state and start the FSM 
-		SetGameState(StartGame());
+		SetGameState(MainMenu());
 		StartCoroutine(FiniteStateMachine());
 	}
 
@@ -133,7 +135,7 @@ public class GameManager : MonoBehaviour
 			finalScore = Mathf.CeilToInt(newScore);
 			m_GameCanvas.ScoreText.text = "Score: " + finalScore.ToString();
 			yield return null;
-		} while (finalScore != m_CurrentScore);
+		} while (finalScore != m_CurrentScore && m_GameCanvas.ScoreText != null);
 		m_TextIncrementing = false;
 	}
 
@@ -149,7 +151,7 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
-	IEnumerable StartGame()
+	IEnumerable MainMenu()
 	{
 		var menu = Instantiate(m_MainMenuPrefab) as GameObject;
 		var menuScript = menu.GetComponent<MainMenu>();
@@ -162,11 +164,14 @@ public class GameManager : MonoBehaviour
 		}
 
 		Destroy(menu);
+		SetGameState(LoadScreen());
+	}
 
-
+	IEnumerable LoadScreen()
+	{
 		var loadScreen = Instantiate(m_LoadScreenPrefab) as GameObject;
 		var loadScript = loadScreen.GetComponent<LoadingScreen>();
-		var arena = Instantiate(m_ArenaPrefab) as GameObject;
+		m_CurrentArena = Instantiate(m_ArenaPrefab) as GameObject;
 
 		foreach(var current in GameStates.LoadingScreen(loadScript))
 		{
@@ -174,30 +179,38 @@ public class GameManager : MonoBehaviour
 		}
 
 		Destroy(loadScreen);
-
-
 		// Set the player position to the start platform defined by the PlatformGenerator
-		var tData = arena.GetComponent<DynamicTerrain>().GetTerrainData();
+		var tData = m_CurrentArena.GetComponent<DynamicTerrain>().GetTerrainData();
 		m_Player.SetActive(true);
 		SetPlayerPosition(m_StartPlatform != null ? new Vector3(m_StartPlatform.transform.position.x,
 													  m_StartPlatform.transform.position.y + 50,
 													  m_StartPlatform.transform.position.z) :
 										            new Vector3(tData.size.x / 2, tData.size.y, tData.size.z / 2));
 
-		SetGameState(PhaseOne());
+		SetGameState(MainGame());
 	}
 
-	IEnumerable PhaseOne()
+	IEnumerable MainGame()
 	{
 		var canvas = Instantiate(m_GameCanvasPrefab) as GameObject;
 		m_GameCanvas = canvas.GetComponent<GameCanvas>();
 		m_GameCanvas.ScoreText.text = "Score: 0";
 
-		foreach(var current in GameStates.MainGame(m_ArenaTimer))
+		foreach(var current in GameStates.MainGame(m_ArenaTimer, m_MinScore, 50, 25))
 		{
 			yield return current;
 		}
 
-		SetGameState(null);
+		Destroy(canvas);
+		Destroy(m_CurrentArena);
+		m_Player.SetActive(false);
+		m_MinScore *= 2;
+
+		foreach(var platform in GameObject.FindGameObjectsWithTag("Platform"))
+		{
+			Destroy(platform);
+		}
+
+		SetGameState(LoadScreen());
 	}
 }
