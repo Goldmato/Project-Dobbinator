@@ -2,8 +2,6 @@
 
 using UnityEngine;
 
-// TEST COMMENT
-
 public class GameManager : MonoBehaviour
 {
 	// Field and properties
