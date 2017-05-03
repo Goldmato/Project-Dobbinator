@@ -121,8 +121,8 @@ public class PlatformGenerator : MonoBehaviour
 			float x = pos.x / m_TerrainData.heightmapWidth;
 			float y = pos.z / m_TerrainData.heightmapHeight;
 
-			Vector3 peakPos = new Vector3(x * m_TerrainData.size.x, pos.y,
-										  y * m_TerrainData.size.z);
+			Vector3 peakPos = new Vector3(x * m_TerrainData.size.x + transform.position.x, pos.y + transform.position.y,
+										  y * m_TerrainData.size.z + transform.position.z);
 			// Debug.Log(string.Format("X Rotation: {0}, Z Rotation: {1}", rotX, rotZ));
 			GameObject newPlatform = Instantiate(m_Platforms[Random.Range(0, m_Platforms.Count)], peakPos,
 								   Quaternion.Euler(0, Random.Range(0, 360), 0)) as GameObject;
@@ -145,68 +145,72 @@ public class PlatformGenerator : MonoBehaviour
 		Debug.Log(m_HillPeaks.Count + " Platforms created!");
 	}
 
-	void RemoveOverlappingPlatforms()
-	{
-		float scanSquareExtent = m_TerrainData.size.x / 32;
-		float scanSquareHalfExtent = scanSquareExtent / 2;
-		int removedPlatforms = 0;
+	#region DEPRECATED
 
-		for(float x = 0; x < m_TerrainData.size.x; x += scanSquareExtent)
-		{
-			for(float y = 0; y < m_TerrainData.size.z; y += scanSquareExtent)
-			{
-				List<Collider> overlappingPlatform = new List<Collider>();
+	//void RemoveOverlappingPlatforms()
+	//{
+	//	float scanSquareExtent = m_TerrainData.size.x / 32;
+	//	float scanSquareHalfExtent = scanSquareExtent / 2;
+	//	int removedPlatforms = 0;
 
-				// Find all Platforms within the defined space
-				foreach(Collider col in Physics.OverlapBox(new Vector3(x + scanSquareHalfExtent, m_TerrainData.size.y / 2, y + scanSquareHalfExtent),
-														   new Vector3(scanSquareHalfExtent, m_TerrainData.size.y, scanSquareHalfExtent)))
-				{
-					if(col.GetComponent<IPlatform>() != null)
-						overlappingPlatform.Add(col);
-				}
+	//	for(float x = transform.position.x; x < m_TerrainData.size.x + transform.position.x; x += scanSquareExtent)
+	//	{
+	//		for(float y = transform.position.z; y < m_TerrainData.size.z + transform.position.z; y += scanSquareExtent)
+	//		{
+	//			List<Collider> overlappingPlatform = new List<Collider>();
 
-				if(overlappingPlatform.Count >= 1)
-				{
-					int platformToKeep = 0;
-					float highestPoint = 0;
+	//			// Find all Platforms within the defined space
+	//			foreach(Collider col in Physics.OverlapBox(new Vector3(x + scanSquareHalfExtent, m_TerrainData.size.y / 2, y + scanSquareHalfExtent),
+	//													   new Vector3(scanSquareHalfExtent, m_TerrainData.size.y, scanSquareHalfExtent)))
+	//			{
+	//				if(col.GetComponent<IPlatform>() != null)
+	//					overlappingPlatform.Add(col);
+	//			}
 
-					// Find the highest Platform in the local list
-					for(int i = 0; i < overlappingPlatform.Count; i++)
-					{
-						if(overlappingPlatform[i].transform.position.y > highestPoint)
-						{
-							platformToKeep = i;
-							highestPoint = overlappingPlatform[i].transform.position.y;
-						}
-					}
+	//			if(overlappingPlatform.Count >= 1)
+	//			{
+	//				int platformToKeep = 0;
+	//				float highestPoint = 0;
 
-					// Destroy all but the highest Platform in the isolated region
-					for(int i = 0; i < overlappingPlatform.Count; i++)
-					{
-						if(i != platformToKeep)
-						{
-							Destroy(overlappingPlatform[i].gameObject);
-							removedPlatforms++;
-							continue;
-						}
+	//				// Find the highest Platform in the local list
+	//				for(int i = 0; i < overlappingPlatform.Count; i++)
+	//				{
+	//					if(overlappingPlatform[i].transform.position.y > highestPoint)
+	//					{
+	//						platformToKeep = i;
+	//						highestPoint = overlappingPlatform[i].transform.position.y;
+	//					}
+	//				}
 
-						if(GameManager.Current.StartPlatform == null)
-						{
-							GameManager.Current.StartPlatform = overlappingPlatform[i].gameObject;
-						}
+	//				// Destroy all but the highest Platform in the isolated region
+	//				for(int i = 0; i < overlappingPlatform.Count; i++)
+	//				{
+	//					if(i != platformToKeep)
+	//					{
+	//						Destroy(overlappingPlatform[i].gameObject);
+	//						removedPlatforms++;
+	//						continue;
+	//					}
 
-						var platformScript = overlappingPlatform[i].GetComponent<IInitializable>();
+	//					if(GameManager.Current.StartPlatform == null)
+	//					{
+	//						GameManager.Current.StartPlatform = overlappingPlatform[i].gameObject;
+	//					}
 
-						if(platformScript != null)
-						{
-							platformScript.Initialize();
-						}
-					}
-				}
-			}
-		}
+	//					var platformScript = overlappingPlatform[i].GetComponent<IInitializable>();
 
-		Debug.Log(removedPlatforms + " Platforms removed! " + (m_HillPeaks.Count - removedPlatforms) + " Platforms remaining.");
-	}
+	//					if(platformScript != null)
+	//					{
+	//						platformScript.Initialize();
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+
+	//	Debug.Log(removedPlatforms + " Platforms removed! " + (m_HillPeaks.Count - removedPlatforms) + " Platforms remaining.");
+	//}
+#endregion
+
 }
 			
