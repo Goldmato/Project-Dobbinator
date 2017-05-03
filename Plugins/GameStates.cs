@@ -2,20 +2,27 @@
 
 using UnityEngine;
 
-// Public container for game states
+// Static public container for game states
 public static class GameStates
 {
-	// Static fields and properties
+	// Static public properties
+	public static int SecondsLeft { get { return m_SecondsLeft; } }
+
+	// Static public fields
 	public static bool Running = true;
 
-	static int m_ScoreBreakpoint = SCORE_INTERVAL;
-
 	// Static delegates and events
-	public delegate void ScoreEventHandler(int score);
-	public static event ScoreEventHandler OnScoreEvent;
+	public delegate void ValueEventHandler(int value);
+	public static event ValueEventHandler OnScoreBreakpoint;
+	public static event ValueEventHandler OnTimerChange;
+
+	// Static private fields
+	private static int m_SecondsLeft;
+	private static int m_ScoreBreakpoint = SCORE_INTERVAL;
 
 	// Constants
 	const int SCORE_INTERVAL = 50;
+	const string GAME_OVER_SCENE = "GameOver";
 
 	public static IEnumerable MainMenu(MainMenu menu)
 	{
@@ -61,17 +68,36 @@ public static class GameStates
 			
 	}
 
-	public static IEnumerable MainGame()
+	public static IEnumerable MainGame(int startSeconds)
 	{
+		m_SecondsLeft = startSeconds;
+		float secondBreakpoint = Time.timeSinceLevelLoad;
+
 		while(Running)
 		{
+			// Check if a second has passed
+			if(Time.timeSinceLevelLoad >= secondBreakpoint)
+			{
+				secondBreakpoint = Time.timeSinceLevelLoad + 1;
+				m_SecondsLeft--;
+				if(OnTimerChange != null)
+				{
+					OnTimerChange(m_SecondsLeft);
+				}
+			}
+
+			// End the game if the timer reaches 0
+			if(m_SecondsLeft <= 0)
+			{
+				UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+			}
+
 			if(GameManager.Current.Score >= m_ScoreBreakpoint)
 			{
-				// Call the main score Event if there are listeners
-				if(OnScoreEvent != null)
+				if(OnScoreBreakpoint != null)
 				{
-					Debug.Log("OnScoreEvent() Called!");
-					OnScoreEvent(GameManager.Current.Score);
+					// Debug.Log("OnScoreEvent() Called!");
+					OnScoreBreakpoint(GameManager.Current.Score);
 				}
 				m_ScoreBreakpoint += SCORE_INTERVAL;
 			}

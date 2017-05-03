@@ -17,11 +17,14 @@ public class GameManager : MonoBehaviour
 	public int Score { get { return m_CurrentScore; } }
 	public int Streak { get { return m_CurrentStreak; } }
 
-	[SerializeField] GameObject m_MainMenuPrefab;
-	[SerializeField] GameObject m_LoadScreenPrefab;
-	[SerializeField] GameObject m_GameCanvasPrefab;
-	[SerializeField] GameObject m_ArenaPrefab;
-	[SerializeField] GameObject m_Player;
+	// Private serialized fields
+	[SerializeField] [Range(1, 1000)] private int m_ArenaTimer = 300;
+
+	[SerializeField] private GameObject m_MainMenuPrefab;
+	[SerializeField] private GameObject m_LoadScreenPrefab;
+	[SerializeField] private GameObject m_GameCanvasPrefab;
+	[SerializeField] private GameObject m_ArenaPrefab;
+	[SerializeField] private GameObject m_Player;
 
 	FirstPersonController m_PlayerController;
 	GameObject  m_StartPlatform;
@@ -67,8 +70,7 @@ public class GameManager : MonoBehaviour
 		}
 		catch(System.NullReferenceException exception)
 		{
-			Debug.LogError("Please make sure all GameManager fields are assigned!");
-			Debug.Break();
+			throw new UnityException("Please make sure all GameManager fields are assigned!", exception);
 		}
 
 		// Set the initial state and start the FSM 
@@ -89,7 +91,7 @@ public class GameManager : MonoBehaviour
 
 	void OnPlayerGrounded()
 	{
-		Debug.Log("Player Grounded!");
+		// Debug.Log("Player Grounded!");
 		ResetStreak();
 	}
 
@@ -191,7 +193,7 @@ public class GameManager : MonoBehaviour
 		m_GameCanvas = canvas.GetComponent<GameCanvas>();
 		m_GameCanvas.ScoreText.text = "Score: 0";
 
-		foreach(var current in GameStates.MainGame())
+		foreach(var current in GameStates.MainGame(m_ArenaTimer))
 		{
 			yield return current;
 		}

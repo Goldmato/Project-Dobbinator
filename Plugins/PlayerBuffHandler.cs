@@ -15,10 +15,10 @@ public class PlayerBuffHandler : MonoBehaviour
 	}
 
 	// Subscribe to necessary events 
-	void OnEnable() { GameStates.OnScoreEvent += ScoreEventHandler; }
+	void OnEnable() { GameStates.OnScoreBreakpoint += ScoreEventHandler; }
 
 	// Unsubscribe from all events
-	void OnDisable() { GameStates.OnScoreEvent -= ScoreEventHandler; }
+	void OnDisable() { GameStates.OnScoreBreakpoint -= ScoreEventHandler; }
 
 	void ScoreEventHandler(int score)
 	{

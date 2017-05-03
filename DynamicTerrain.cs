@@ -68,7 +68,6 @@ public class DynamicTerrain : MonoBehaviour
 		}
 		catch (System.NullReferenceException exception)
 		{
-			Debug.Break();
 			string errMessage = "Error! Please make sure this script is attached to a gameObject with the specified children: ";
 			foreach(string child in missingChildren)
 			{
