@@ -1,11 +1,12 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 using UnityEngine;
 
 public class DynamicTerrain : MonoBehaviour
 {
 
-	// Fields and properties 
+	// Private serialized fields
 	[SerializeField] [Range(0.01f, 1f)] private float m_BorderHeight;
 
 	[SerializeField] private GameObject  m_WallTop, m_WallBottom, m_WallRight, m_WallLeft, m_DeathZone;
@@ -13,35 +14,67 @@ public class DynamicTerrain : MonoBehaviour
 
 	TerrainData m_TerrainData;
 
+	// Private fields
 	float m_MaxHeight;
 	float m_TerrainBorderHeight;
 	bool  m_TerrainFinishedGenerating = false;
 
+	// Constants
 	const float DELAY = 0.25f;
+	const string WALL_TOP_NAME = "wall_top";
+	const string WALL_BOTTOM_NAME = "wall_bottom";
+	const string WALL_RIGHT_NAME = "wall_right";
+	const string WALL_LEFT_NAME = "wall_left";
+	const string DEATH_ZONE_NAME = "death_zone";
 
 	void Start()
 	{
 		// If the wall references are empty, find them via searching through the child objects
 		// Otherwise, throw a new exception error and pause the game
+		List<string> missingChildren = new List<string>();
+
 		try
 		{
 			if (m_WallTop == null)
-				m_WallTop = transform.FindChild("wall_top").gameObject;
+			{
+				m_WallTop = transform.FindChild(WALL_TOP_NAME).gameObject;
+				if(m_WallTop == null)
+					missingChildren.Add(WALL_TOP_NAME);
+			}
 			if (m_WallBottom == null)
-				m_WallBottom = transform.FindChild("wall_bottom").gameObject;
+			{
+				m_WallBottom = transform.FindChild(WALL_BOTTOM_NAME).gameObject;
+				if(m_WallBottom == null)
+					missingChildren.Add(WALL_BOTTOM_NAME);
+			}
 			if (m_WallRight == null)
-				m_WallRight = transform.FindChild("wall_right").gameObject;
-			if (m_WallLeft == null)
-				m_WallLeft = transform.FindChild("wall_left").gameObject;
+			{
+				m_WallRight = transform.FindChild(WALL_RIGHT_NAME).gameObject;
+				if(m_WallRight == null)
+					missingChildren.Add(WALL_RIGHT_NAME);
+			}
+			if(m_WallLeft == null)
+			{
+				m_WallLeft = transform.FindChild(WALL_LEFT_NAME).gameObject;
+				if(m_WallLeft == null)
+					missingChildren.Add(WALL_LEFT_NAME);
+			}
 			if(m_DeathZone == null)
-				m_DeathZone = transform.FindChild("death_zone").gameObject;
+			{
+				m_DeathZone = transform.FindChild(DEATH_ZONE_NAME).gameObject;
+				if(m_DeathZone == null)
+					missingChildren.Add(DEATH_ZONE_NAME);
+			}
 		}
 		catch (System.NullReferenceException exception)
 		{
 			Debug.Break();
-			Debug.LogError("Error! Please make sure this script is attached to a gameObject with the specified children: " +
-							"'wall_top', 'wall_bottom', 'wall_right', 'wall_left'");
-			throw exception;
+			string errMessage = "Error! Please make sure this script is attached to a gameObject with the specified children: ";
+			foreach(string child in missingChildren)
+			{
+				errMessage += child + " | ";
+			}
+			throw new UnityException(errMessage);
 		}
 
 		// Start the main method
