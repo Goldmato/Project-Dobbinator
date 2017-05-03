@@ -8,7 +8,7 @@ public class DynamicTerrain : MonoBehaviour
 	// Fields and properties 
 	[SerializeField] [Range(0.01f, 1f)] private float m_BorderHeight;
 
-	[SerializeField] private GameObject  m_WallTop, m_WallBottom, m_WallRight, m_WallLeft;
+	[SerializeField] private GameObject  m_WallTop, m_WallBottom, m_WallRight, m_WallLeft, m_DeathZone;
 	[SerializeField] private Texture2D[] m_SplatTextures;
 
 	TerrainData m_TerrainData;
@@ -33,6 +33,8 @@ public class DynamicTerrain : MonoBehaviour
 				m_WallRight = transform.FindChild("wall_right").gameObject;
 			if (m_WallLeft == null)
 				m_WallLeft = transform.FindChild("wall_left").gameObject;
+			if(m_DeathZone == null)
+				m_DeathZone = transform.FindChild("death_zone").gameObject;
 		}
 		catch (System.NullReferenceException exception)
 		{
@@ -109,6 +111,11 @@ public class DynamicTerrain : MonoBehaviour
 		// Set terrain size AFTER setting the resolution
 		m_TerrainData.size = new Vector3(mapResX, mapResY, mapResZ);
 		m_TerrainBorderHeight = m_BorderHeight * m_TerrainData.size.y;
+
+		// Scale the deathzone height to the border height
+		m_DeathZone.transform.localScale = new Vector3(m_DeathZone.transform.localScale.x,
+													   m_TerrainBorderHeight,
+													   m_DeathZone.transform.localScale.z);
 	}
 
 	void BuildSplats()

@@ -1,3 +1,5 @@
+using System.Collections;
+
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
@@ -13,7 +15,8 @@ public class FirstPersonController : MonoBehaviour
 	// Public fields
 	public PlayerStats Stats;
 
-	// Serialized fields visible in the inspector
+	// Private serialized fields
+	[SerializeField] [Range(0.001f, 10f)] private float m_GameOverDelay = 0.5f;
 	[SerializeField] private bool m_IsWalking;
     [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
 	[SerializeField] [Range(0f, JUMP_MAX_ACCEL)] private float m_FlyAcceleration;
@@ -50,6 +53,7 @@ public class FirstPersonController : MonoBehaviour
 	float m_ForceCurVelocity;
     bool m_PreviouslyGrounded;
 	bool m_GroundedTrigger;
+	bool m_GameOverFlag;
 	bool m_ForceJumping;
     bool m_Jumping;
     bool m_Jump;
@@ -286,11 +290,13 @@ public class FirstPersonController : MonoBehaviour
 	{
 		// Rigidbody body = hit.collider.attachedRigidbody;
 
-		if(other.gameObject.CompareTag("DeathZone"))
+		if(!m_GameOverFlag && other.gameObject.CompareTag("DeathZone"))
 		{
-			UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
-			return;
+			m_GameOverFlag = true;
+			m_CharacterController.enabled = false;
+			StartCoroutine("GameOver");
 		}
+
 		var platform = other.gameObject.GetComponentInParent<IPlatform>();
 		if(platform != null)
 		{
@@ -325,5 +331,11 @@ public class FirstPersonController : MonoBehaviour
 		m_ForceTimer = Time.timeSinceLevelLoad + m_ForceCooldown;
 		m_MoveDir = force * Stats.forceMultiplier;
 		return true;
+	}
+
+	private IEnumerator GameOver()
+	{
+		yield return new WaitForSeconds(m_GameOverDelay);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
 	}
 }
