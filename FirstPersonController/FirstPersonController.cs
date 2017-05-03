@@ -16,7 +16,7 @@ public class FirstPersonController : MonoBehaviour
 	// Serialized fields visible in the inspector
 	[SerializeField] private bool m_IsWalking;
     [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
-	[SerializeField] [Range(0f, c_jumpMaxAcceleration)] private float m_FlyAcceleration;
+	[SerializeField] [Range(0f, JUMP_MAX_ACCEL)] private float m_FlyAcceleration;
     [SerializeField] private float m_StickToGroundForce;
     [SerializeField] private MouseLook m_MouseLook;
     [SerializeField] private bool m_UseFovKick;
@@ -59,7 +59,8 @@ public class FirstPersonController : MonoBehaviour
 	public event PlayerGroundedHandler OnPlayerGrounded;
 
 	// Constants
-	const float c_jumpMaxAcceleration = 5f;
+	const float JUMP_MAX_ACCEL = 5f;
+	const string GAME_OVER_SCENE = "GameOver";
 
     // Use this for initialization
     private void Start()
@@ -159,7 +160,7 @@ public class FirstPersonController : MonoBehaviour
 		else
 		{
 			m_ForceInterpolation = Mathf.SmoothDamp(0f, 1f, ref m_ForceCurVelocity,
-													c_jumpMaxAcceleration - m_FlyAcceleration);
+													JUMP_MAX_ACCEL - m_FlyAcceleration);
 			m_MoveDir.x = Mathf.Lerp(m_MoveDir.x, newSpeed.x, m_ForceInterpolation);
 
 			m_MoveDir.z = Mathf.Lerp(m_MoveDir.z, newSpeed.y, m_ForceInterpolation);
@@ -285,8 +286,13 @@ public class FirstPersonController : MonoBehaviour
 	{
 		// Rigidbody body = hit.collider.attachedRigidbody;
 
+		if(other.gameObject.CompareTag("DeathZone"))
+		{
+			UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+			return;
+		}
 		var platform = other.gameObject.GetComponentInParent<IPlatform>();
-		if (platform != null)
+		if(platform != null)
 		{
 			platform.PlayerBoost(this);
 			m_ForceJumping = true;
