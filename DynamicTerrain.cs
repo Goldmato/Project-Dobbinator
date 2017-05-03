@@ -74,7 +74,7 @@ public class DynamicTerrain : MonoBehaviour
 			{
 				errMessage += child + " | ";
 			}
-			throw new UnityException(errMessage);
+			throw new UnityException(errMessage, exception);
 		}
 
 		// Start the main method
