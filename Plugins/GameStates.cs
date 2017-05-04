@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-
 using UnityEngine;
 
 // Static public container for game states
