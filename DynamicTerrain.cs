@@ -33,6 +33,7 @@ public class DynamicTerrain : MonoBehaviour
 		// Otherwise, throw a new exception error and pause the game
 		List<string> missingChildren = new List<string>();
 
+		//TODO: Clean this up
 		try
 		{
 			if (m_WallTop == null)
