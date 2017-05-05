@@ -3,6 +3,8 @@
 public class SpringLauncher : MonoBehaviour, IPlatform
 {
 	// Fields and properties
+	[SerializeField] private bool m_DisableDuringAnimation;
+
 	[SerializeField] [Range(1, 1000)] private int m_ScoreValue = 10;
 
 	[SerializeField] [Range(0.001f, 1000f)] private float m_ForceFactor = 100f;
@@ -69,8 +71,9 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 				// Debug.Log("Platform reached end of Stage " + ((STAGE_ONE + 1) - m_MovePlatform));
 				m_TargetPos = m_OriginalPos;
 				m_TargetScale = m_OriginalScale;
+				m_MovePlatform--;
 				if(m_MovePlatform > DISABLED)
-					m_MovePlatform--;
+					m_PlatformBase.GetComponent<Collider>().enabled = true;
 			}
 		}
 	}
@@ -79,13 +82,14 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	{
 		// If ApplyForce isn't on cooldown, play the main audio clip and 
 		// apply a "spring" effect to the platform
-
 		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
-			if (m_MovePlatform <= DISABLED)
+			if(m_MovePlatform <= DISABLED)
 				PlatformSpringEffect();
+			if(m_DisableDuringAnimation)
+				m_PlatformBase.GetComponent<Collider>().enabled = false;
 			GameManager.Current.AddScore(m_ScoreValue);
 		}
 	}

@@ -30,6 +30,9 @@ public class PlatformGenerator : MonoBehaviour
 	float m_TerrainMaxHeight;
 	float m_SkyLayerHeight;
 
+	int m_GroundPlatformsSpawned;
+	int m_SkyPlatformsSpawned;
+
 	const float DELAY = 0.25f;
 
 	void Start()
@@ -82,6 +85,8 @@ public class PlatformGenerator : MonoBehaviour
 		// Finish execution
 		GameManager.Current.LoadState = "Done";
 		GameManager.Current.LoadValue = 1.0f;
+
+		Debug.Log(m_GroundPlatformsSpawned + " Ground platforms spawned | " + m_SkyPlatformsSpawned + " Sky platforms spawned");
 	}
 
 	void FindHillPeaks()
@@ -152,23 +157,21 @@ public class PlatformGenerator : MonoBehaviour
 			{
 				newPlatform.transform.up = hitInfo.normal;
 			}
-		}
 
-		Debug.Log(m_HillPeaks.Count + " Platforms created!");
+			m_GroundPlatformsSpawned++;
+		}
 	}
 
 	void SpawnSkyPlatformLayer()
 	{
-		m_SkyLayerHeight += m_SkyPlatformHeightInterval;
-
 		float spawnChance = m_SkyPlatformSpawnChance;
 		int scanEmptySpace = m_ScanSquareInnerExtent * 2 + 1;
 
-		for(int x = 0; x < m_TerrainData.size.x; x += m_ScanSquareExtent)
+		for(int x = (int)transform.position.x; x < m_TerrainData.size.x + transform.position.x; x += m_ScanSquareExtent)
 		{
-			for(int z = 0; z < m_TerrainData.size.z; z += m_ScanSquareExtent)
+			for(int z = (int)transform.position.z; z < m_TerrainData.size.z + transform.position.z; z += m_ScanSquareExtent)
 			{
-				if(Random.Range(0, 100) <= spawnChance)
+				if(Random.Range(0f, 100f) <= spawnChance)
 				{
 					// Find a random spot within the inner scan sqare extent range
 					int randX = Random.Range(x + scanEmptySpace, (x + m_ScanSquareExtent) - scanEmptySpace);
@@ -177,6 +180,7 @@ public class PlatformGenerator : MonoBehaviour
 					Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity);
 
 					spawnChance = m_SkyPlatformSpawnChance;
+					m_SkyPlatformsSpawned++;
 				}
 				else
 				{
@@ -184,6 +188,8 @@ public class PlatformGenerator : MonoBehaviour
 				}
 			}
 		}
+
+		m_SkyLayerHeight += m_SkyPlatformHeightInterval;
 	}
 
 	#region DEPRECATED

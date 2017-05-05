@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -26,9 +27,9 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private GameObject m_ArenaPrefab;
 	[SerializeField] private GameObject m_Player;
 
+	List<GameObject> m_Arena = new List<GameObject>();
 	FirstPersonController m_PlayerController;
 	GameObject m_StartPlatform;
-	GameObject m_CurrentArena;
 	GameCanvas m_GameCanvas;
 
 	string m_LoadState;
@@ -37,6 +38,7 @@ public class GameManager : MonoBehaviour
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
 	int    m_MinScore = 500;
+	int    m_ArenaIndex;
 	bool   m_TextIncrementing;
 
 	// Constants
@@ -171,7 +173,22 @@ public class GameManager : MonoBehaviour
 	{
 		var loadScreen = Instantiate(m_LoadScreenPrefab) as GameObject;
 		var loadScript = loadScreen.GetComponent<LoadingScreen>();
-		m_CurrentArena = Instantiate(m_ArenaPrefab) as GameObject;
+
+		var arenaSpawnPos = Vector3.zero;
+		if(m_ArenaIndex > 0)
+		{
+			var prevArenaPos = m_Arena[m_ArenaIndex - 1].transform.position;
+			var prevArenaSize = m_Arena[m_ArenaIndex - 1].GetComponent<Collider>().bounds.size;
+
+			arenaSpawnPos = prevArenaPos;
+
+			if(Random.value > 0.5f)
+				arenaSpawnPos.z += prevArenaSize.z;
+			else
+				arenaSpawnPos.x += prevArenaSize.x;
+		}
+
+		m_Arena.Add(Instantiate(m_ArenaPrefab, arenaSpawnPos, Quaternion.identity) as GameObject);
 
 		foreach(var current in GameStates.LoadingScreen(loadScript))
 		{
@@ -180,13 +197,17 @@ public class GameManager : MonoBehaviour
 
 		Destroy(loadScreen);
 		// Set the player position to the start platform defined by the PlatformGenerator
-		var tData = m_CurrentArena.GetComponent<DynamicTerrain>().GetTerrainData();
 		m_Player.SetActive(true);
-		SetPlayerPosition(m_StartPlatform != null ? new Vector3(m_StartPlatform.transform.position.x,
-													  m_StartPlatform.transform.position.y + 50,
-													  m_StartPlatform.transform.position.z) :
-										            new Vector3(tData.size.x / 2, tData.size.y, tData.size.z / 2));
 
+		if(m_ArenaIndex == 0)
+		{
+			var tData = m_Arena[m_ArenaIndex].GetComponent<DynamicTerrain>().GetTerrainData();
+			SetPlayerPosition(m_StartPlatform != null ? new Vector3(m_StartPlatform.transform.position.x,
+														  m_StartPlatform.transform.position.y + 50,
+														  m_StartPlatform.transform.position.z) :
+														new Vector3(tData.size.x / 2, tData.size.y, tData.size.z / 2));
+
+		}
 		SetGameState(MainGame());
 	}
 
@@ -194,23 +215,18 @@ public class GameManager : MonoBehaviour
 	{
 		var canvas = Instantiate(m_GameCanvasPrefab) as GameObject;
 		m_GameCanvas = canvas.GetComponent<GameCanvas>();
-		m_GameCanvas.ScoreText.text = "Score: 0";
+		AddScore(0);
 
 		foreach(var current in GameStates.MainGame(m_ArenaTimer, m_MinScore, 50, 25))
 		{
 			yield return current;
 		}
 
-		Destroy(canvas);
-		Destroy(m_CurrentArena);
 		m_Player.SetActive(false);
+		Destroy(canvas);
 		m_MinScore *= 2;
 
-		foreach(var platform in GameObject.FindGameObjectsWithTag("Platform"))
-		{
-			Destroy(platform);
-		}
-
+		m_ArenaIndex++;
 		SetGameState(LoadScreen());
 	}
 }
