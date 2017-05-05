@@ -7,12 +7,18 @@ using UnityEngine;
 public class PlatformGenerator : MonoBehaviour
 {
 	// Fields and properties 
+	[SerializeField] [Range(-1000f, 1000f)] float m_SkyPlatformBaseHeight;
+	[SerializeField] [Range(0.001f, 1000f)] float m_SkyPlatformHeightInterval;
+	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnChance;
+	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnEntropy;
 	[SerializeField] [Range(0.001f, 1.0f)] float m_HeightTolerance;
 	[SerializeField] [Range(0.001f, 1.0f)] float m_SlopeTolerance;
 	[SerializeField] [Range(1, 100)]	   int   m_ScanSquareExtent;
-	[SerializeField] [Range(1, 99)]		   int m_ScanSquareInnerExtent;
+	[SerializeField] [Range(1, 99)]		   int   m_ScanSquareInnerExtent;
+	[SerializeField] [Range(1, 10)]		   int   m_SkyPlatformLayers;
 
-	[SerializeField] List<GameObject> m_Platforms;
+	[SerializeField] List<GameObject> m_GroundPlatforms;
+	[SerializeField] List<GameObject> m_SkyPlatforms;
 	[SerializeField] GameObject		  m_Player;
 
 	IEnumerable m_CurrentState;
@@ -22,6 +28,7 @@ public class PlatformGenerator : MonoBehaviour
 	TerrainData    m_TerrainData;
 
 	float m_TerrainMaxHeight;
+	float m_SkyLayerHeight;
 
 	const float DELAY = 0.25f;
 
@@ -49,23 +56,28 @@ public class PlatformGenerator : MonoBehaviour
 			yield return new WaitForSeconds(0.1f);
 		}
 
+		m_SkyLayerHeight = m_TerrainData.size.y + m_SkyPlatformBaseHeight;
+
 		// Find all points on the map which would be considered "hill peaks" by the algorithm
 		GameManager.Current.LoadState = "Calculating Hill Peaks";
-		GameManager.Current.LoadValue = 0.65f;
+		GameManager.Current.LoadValue = 0.6f;
 		FindHillPeaks();
 		yield return new WaitForSeconds(DELAY);
 
-		// Instantiate a Platform at each point in the hillPeaks list
-		GameManager.Current.LoadState = "Spawning Platforms";
-		GameManager.Current.LoadValue = 0.85f;
-		SpawnPlatforms();
+		// Instantiate a set number of platform layers, starting with the ground layer
+		GameManager.Current.LoadState = "Spawning Platform Layers [Ground]";
+		GameManager.Current.LoadValue = 0.7f;
+		SpawnGroundPlatformLayer();
 		yield return new WaitForSeconds(DELAY);
 
-		// Clear up most of the excess Platforms 
-		//GameManager.Current.LoadState = "Removing Excess Platforms";
-		//GameManager.Current.LoadValue = 0.95f;
-		//RemoveOverlappingPlatforms();
-		//yield return new WaitForSeconds(DELAY);
+		var baseLoadValue = GameManager.Current.LoadValue;
+		for(int i = 0; i < m_SkyPlatformLayers; i++)
+		{
+			GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (i + 1) + "]";
+			GameManager.Current.LoadValue = baseLoadValue + ((1.0f / m_SkyPlatformLayers * i) * (1.0f - baseLoadValue));
+			SpawnSkyPlatformLayer();
+			yield return new WaitForSeconds(DELAY);
+		}
 
 		// Finish execution
 		GameManager.Current.LoadState = "Done";
@@ -113,7 +125,7 @@ public class PlatformGenerator : MonoBehaviour
 		}
 	}
 
-	void SpawnPlatforms()
+	void SpawnGroundPlatformLayer()
 	{
 		// Create a random Platform at each hill point
 		foreach (Vector3 pos in m_HillPeaks)
@@ -124,7 +136,7 @@ public class PlatformGenerator : MonoBehaviour
 			Vector3 peakPos = new Vector3(x * m_TerrainData.size.x + transform.position.x, pos.y + transform.position.y,
 										  y * m_TerrainData.size.z + transform.position.z);
 			// Debug.Log(string.Format("X Rotation: {0}, Z Rotation: {1}", rotX, rotZ));
-			GameObject newPlatform = Instantiate(m_Platforms[Random.Range(0, m_Platforms.Count)], peakPos,
+			GameObject newPlatform = Instantiate(m_GroundPlatforms[Random.Range(0, m_GroundPlatforms.Count)], peakPos,
 								   Quaternion.Euler(0, Random.Range(0, 360), 0)) as GameObject;
 
 			// Set the start platform if null
@@ -143,6 +155,35 @@ public class PlatformGenerator : MonoBehaviour
 		}
 
 		Debug.Log(m_HillPeaks.Count + " Platforms created!");
+	}
+
+	void SpawnSkyPlatformLayer()
+	{
+		m_SkyLayerHeight += m_SkyPlatformHeightInterval;
+
+		float spawnChance = m_SkyPlatformSpawnChance;
+		int scanEmptySpace = m_ScanSquareInnerExtent * 2 + 1;
+
+		for(int x = 0; x < m_TerrainData.size.x; x += m_ScanSquareExtent)
+		{
+			for(int z = 0; z < m_TerrainData.size.z; z += m_ScanSquareExtent)
+			{
+				if(Random.Range(0, 100) <= spawnChance)
+				{
+					// Find a random spot within the inner scan sqare extent range
+					int randX = Random.Range(x + scanEmptySpace, (x + m_ScanSquareExtent) - scanEmptySpace);
+					int randZ = Random.Range(z + scanEmptySpace, (z + m_ScanSquareExtent) - scanEmptySpace);
+
+					Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity);
+
+					spawnChance = m_SkyPlatformSpawnChance;
+				}
+				else
+				{
+					spawnChance += m_SkyPlatformSpawnEntropy;
+				}
+			}
+		}
 	}
 
 	#region DEPRECATED

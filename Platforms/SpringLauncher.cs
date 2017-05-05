@@ -3,12 +3,14 @@
 public class SpringLauncher : MonoBehaviour, IPlatform
 {
 	// Fields and properties
-	[SerializeField] [Range(0.001f, 1000f)] private float forceFactor = 100f;
-	[SerializeField] [Range(0.001f, 5f)]    private float springDistance = 2.5f;
-	[SerializeField] [Range(0.001f, 5f)]    private float springTime = 2.5f;
-	[SerializeField] [Range(0.001f, 5f)]    private float scaleFactor = 1.5f;
-	[SerializeField] [Range(0.001f, 2f)]    private float soundPitchLow = 0.5f;
-	[SerializeField] [Range(0.001f, 2f)]    private float soundPitchHigh = 1.5f;
+	[SerializeField] [Range(1, 1000)] private int m_ScoreValue = 10;
+
+	[SerializeField] [Range(0.001f, 1000f)] private float m_ForceFactor = 100f;
+	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringDistance = 2.5f;
+	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringTime = 2.5f;
+	[SerializeField] [Range(0.001f, 5f)]    private float m_ScaleFactor = 1.5f;
+	[SerializeField] [Range(0.001f, 2f)]    private float m_SoundPitchLow = 0.5f;
+	[SerializeField] [Range(0.001f, 2f)]    private float m_SoundPitchHigh = 1.5f;
 
 	[SerializeField] Transform m_PlatformBase;
 
@@ -58,9 +60,9 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		if(m_MovePlatform > DISABLED)
 		{
 			transform.position = Vector3.SmoothDamp(transform.position, m_TargetPos,
-														   ref m_MoveVelocity, springTime);
+														   ref m_MoveVelocity, m_SpringTime);
 			m_PlatformBase.localScale = Vector3.SmoothDamp(m_PlatformBase.localScale, m_TargetScale,
-													  ref m_ScaleVelocity, springTime);
+													  ref m_ScaleVelocity, m_SpringTime);
 
 			if (Vector3.Distance(transform.position, m_TargetPos) <= 0.1f)
 			{
@@ -78,20 +80,20 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		// If ApplyForce isn't on cooldown, play the main audio clip and 
 		// apply a "spring" effect to the platform
 
-		if(character.ApplyForce(transform.up * forceFactor))
+		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
-			m_AudioSource.pitch = Random.Range(soundPitchLow, soundPitchHigh);
+			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
 			if (m_MovePlatform <= DISABLED)
 				PlatformSpringEffect();
-			GameManager.Current.AddScore(10);
+			GameManager.Current.AddScore(m_ScoreValue);
 		}
 	}
 
 	void PlatformSpringEffect()
 	{
-		m_TargetPos  =  transform.position - (transform.up * springDistance);
-		m_TargetScale = m_PlatformBase.localScale * scaleFactor;
+		m_TargetPos  =  transform.position - (transform.up * m_SpringDistance);
+		m_TargetScale = m_PlatformBase.localScale * m_ScaleFactor;
 		m_MoveVelocity = Vector3.zero;
 		m_ScaleVelocity = Vector3.zero;
 		m_MovePlatform = STAGE_ONE;

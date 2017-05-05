@@ -290,12 +290,12 @@ public class FirstPersonController : MonoBehaviour
 	{
 		// Rigidbody body = hit.collider.attachedRigidbody;
 
-		//if(!m_GameOverFlag && other.gameObject.CompareTag("DeathZone"))
-		//{
-		//	m_GameOverFlag = true;
-		//	m_CharacterController.enabled = false;
-		//	StartCoroutine("GameOver");
-		//}
+		if(!m_GameOverFlag && other.gameObject.CompareTag("DeathZone"))
+		{
+			m_GameOverFlag = true;
+			m_CharacterController.enabled = false;
+			StartCoroutine("GameOver");
+		}
 
 		var platform = other.gameObject.GetComponentInParent<IPlatform>();
 		if(platform != null)

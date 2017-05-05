@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
 	float  m_StreakBonus;
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
-	int    m_MinScore = 50;
+	int    m_MinScore = 500;
 	bool   m_TextIncrementing;
 
 	// Constants
