@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+
+using UnityEngine;
 
 public class SpringLauncher : MonoBehaviour, IPlatform
 {
@@ -6,6 +8,7 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	[SerializeField] [Range(1, 1000)] private int m_ScoreValue = 10;
 
 	[SerializeField] [Range(0.001f, 1000f)] private float m_ForceFactor = 100f;
+	[SerializeField] [Range(0.001f, 100f)]  private float m_DisableDelay = 10f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringDistance = 2.5f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringTime = 2.5f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_ScaleFactor = 1.5f;
@@ -28,6 +31,7 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	static bool m_NullExceptionFlag;
 
 	const byte  STAGE_ONE = 2, STAGE_TWO = 1, DISABLED = 0;
+	const float MIN_ALPHA = 0.5f;
 
 	void Start()
 	{
@@ -69,10 +73,11 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 
 			for(int i = 0; i < m_Renderer.Length; i++)
 			{
-				m_Renderer[i].material.color = new Color(m_Renderer[i].material.color.r, m_Renderer[i].material.color.g,
-														 m_Renderer[i].material.color.b, m_Renderer[i].material.color.a - 0.01f);
-				if(m_Renderer[i].material.color.a <= 0.01f)
-					m_PlatformBase.GetComponent<Collider>().enabled = false;
+				if(m_Renderer[i].material.color.a > MIN_ALPHA)  
+				{
+					m_Renderer[i].material.color = new Color(m_Renderer[i].material.color.r, m_Renderer[i].material.color.g,
+															m_Renderer[i].material.color.b, m_Renderer[i].material.color.a - 0.01f);
+				}
 			}
 
 			if (Vector3.Distance(transform.position, m_TargetPos) <= 0.1f)
@@ -81,8 +86,6 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 				m_TargetPos = m_OriginalPos;
 				m_TargetScale = m_OriginalScale;
 				m_MovePlatform--;
-				if(m_MovePlatform <= DISABLED)
-					Destroy(gameObject);
 			}
 		}
 	}
@@ -90,16 +93,11 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	public void PlayerBoost(FirstPersonController character)
 	{
 		// If ApplyForce isn't on cooldown, play the main audio clip and 
-		// apply a "spring" effect to the platform
+		// apply a "spring" effect to the platform and disable the collider
+		// and shadow rendering
 		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
-			// Disable shadows and collisions
-			for(int i = 0; i < m_Renderer.Length; i++)
-			{
-				m_Renderer[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-			}
-			m_PlatformBase.GetComponent<Collider>().enabled = false;
-
+			StartCoroutine(DisablePlatform());
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
 			if(m_MovePlatform <= DISABLED)
@@ -115,5 +113,26 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		m_MoveVelocity = Vector3.zero;
 		m_ScaleVelocity = Vector3.zero;
 		m_MovePlatform = STAGE_ONE;
+	}
+
+	IEnumerator DisablePlatform() 
+	{
+		var col = m_PlatformBase.GetComponent<Collider>();
+
+		// Disable shadows and collisions
+		for(int i = 0; i < m_Renderer.Length; i++)
+		{
+			m_Renderer[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+		}
+		col.enabled = false;
+		yield return new WaitForSeconds(m_DisableDelay);
+		col.enabled = true;
+
+		// Set transparency of all renderers back to max
+		for(int i = 0; i < m_Renderer.Length; i++)
+		{
+			m_Renderer[i].material.color = new Color(m_Renderer[i].material.color.r, m_Renderer[i].material.color.g,
+													 m_Renderer[i].material.color.b, 1f);
+		}
 	}
 }
