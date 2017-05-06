@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class DynamicTerrain : MonoBehaviour
 {
-
+	// Public fields
+	public Collider    m_WallTop, m_WallRight;
+	public Transform   m_DeathZone;
+	
 	// Private serialized fields
-	[SerializeField] [Range(0.01f, 1f)] private float m_BorderHeight;
-
-	[SerializeField] private GameObject  m_WallTop, m_WallBottom, m_WallRight, m_WallLeft, m_DeathZone;
 	[SerializeField] private Texture2D[] m_SplatTextures;
+	[SerializeField] [Range(0.01f, 1f)] private float m_BorderHeight = 0.1f;
+	[SerializeField] [Range(0.01f, 1f)] private float m_TerrainHeight = 0.5f;
 
 	TerrainData m_TerrainData;
 
@@ -38,31 +40,19 @@ public class DynamicTerrain : MonoBehaviour
 		{
 			if (m_WallTop == null)
 			{
-				m_WallTop = transform.FindChild(WALL_TOP_NAME).gameObject;
+				m_WallTop = transform.FindChild(WALL_TOP_NAME).GetComponent<Collider>();
 				if(m_WallTop == null)
 					missingChildren.Add(WALL_TOP_NAME);
 			}
-			if (m_WallBottom == null)
-			{
-				m_WallBottom = transform.FindChild(WALL_BOTTOM_NAME).gameObject;
-				if(m_WallBottom == null)
-					missingChildren.Add(WALL_BOTTOM_NAME);
-			}
 			if (m_WallRight == null)
 			{
-				m_WallRight = transform.FindChild(WALL_RIGHT_NAME).gameObject;
+				m_WallRight = transform.FindChild(WALL_RIGHT_NAME).GetComponent<Collider>();
 				if(m_WallRight == null)
 					missingChildren.Add(WALL_RIGHT_NAME);
 			}
-			if(m_WallLeft == null)
-			{
-				m_WallLeft = transform.FindChild(WALL_LEFT_NAME).gameObject;
-				if(m_WallLeft == null)
-					missingChildren.Add(WALL_LEFT_NAME);
-			}
 			if(m_DeathZone == null)
 			{
-				m_DeathZone = transform.FindChild(DEATH_ZONE_NAME).gameObject;
+				m_DeathZone = transform.FindChild(DEATH_ZONE_NAME);
 				if(m_DeathZone == null)
 					missingChildren.Add(DEATH_ZONE_NAME);
 			}
@@ -132,10 +122,9 @@ public class DynamicTerrain : MonoBehaviour
 	void BuildTerrainData()
 	{
 		// Calculate the resolutions and terrain size based on the distance between arena walls
-		int mapResX = Mathf.RoundToInt(m_WallLeft.transform.position.x - m_WallRight.transform.position.x);
-		int mapResY = Mathf.RoundToInt((m_WallTop.transform.lossyScale.y + m_WallBottom.transform.lossyScale.y +
-								        m_WallRight.transform.lossyScale.y + m_WallLeft.transform.lossyScale.y) / 4);
-		int mapResZ = Mathf.RoundToInt(m_WallBottom.transform.position.z - m_WallTop.transform.position.z);
+		int mapResX = Mathf.RoundToInt(m_WallTop.bounds.size.x);
+		int mapResY = Mathf.RoundToInt(m_WallTop.bounds.size.y * m_TerrainHeight);
+		int mapResZ = Mathf.RoundToInt(m_WallRight.bounds.size.z);
 
 		m_TerrainData.heightmapResolution = mapResX / 2 + 1;
 		m_TerrainData.baseMapResolution = mapResX / 2 + 1;
@@ -147,7 +136,7 @@ public class DynamicTerrain : MonoBehaviour
 
 		// Scale the deathzone height to the border height
 		m_DeathZone.transform.localScale = new Vector3(m_DeathZone.transform.localScale.x,
-													   m_TerrainBorderHeight,
+													   m_TerrainData.size.y / m_TerrainBorderHeight,
 													   m_DeathZone.transform.localScale.z);
 	}
 
