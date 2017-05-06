@@ -2,6 +2,7 @@
 !/Assets/
 /Assets/*
 !/Assets/Scripts
+!/Assets/Library
 !/.gitignore
 !/README.md
 !/LICENSE
