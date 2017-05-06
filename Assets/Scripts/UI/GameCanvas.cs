@@ -48,8 +48,6 @@ public class GameCanvas : MonoBehaviour
 		else
 		{
 			// Reset the streak bonus
-			if(GameManager.Current.Streak != 0)
-				GameManager.Current.ResetStreak();
 			ResetStreakBar();
 		}
 

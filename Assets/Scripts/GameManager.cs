@@ -93,12 +93,6 @@ public class GameManager : MonoBehaviour
 		m_Player.transform.position = pos;
 	}
 
-	void OnPlayerGrounded()
-	{
-		// Debug.Log("Player Grounded!");
-		ResetStreak(CallEvent: true);
-	}
-
 	// Add score and multiply it by a streak bonus
 	public void AddScore(int score)
 	{
@@ -114,7 +108,7 @@ public class GameManager : MonoBehaviour
 		m_CurrentScore += Mathf.RoundToInt(score + m_StreakBonus);
 	}
 
-	public void ResetStreak(bool CallEvent)
+	public void ResetStreak(bool CallEvent = false)
 	{
 		if(CallEvent && OnResetStreak != null)
 			OnResetStreak();
