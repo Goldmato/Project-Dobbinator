@@ -2,7 +2,6 @@
 !/Assets/
 /Assets/*
 !/Assets/Scripts
-/Assets/Scripts/*
-!/Assets/Scripts/*.cs
-!/Assets/Scripts/*.meta
 !/.gitignore
+!/README.md
+!/LISCENSE
