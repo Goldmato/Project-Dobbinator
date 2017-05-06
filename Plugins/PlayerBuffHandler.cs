@@ -15,16 +15,23 @@ public class PlayerBuffHandler : MonoBehaviour
 	}
 
 	// Subscribe to necessary events 
-	void OnEnable() { GameStates.OnScoreBreakpoint += ScoreEventHandler; }
+	void OnEnable() { GameStates.OnScoreBreakpoint += BoostPlayerStats; 
+					  GameManager.OnResetStreak += ResetPlayerStats; }
 
 	// Unsubscribe from all events
-	void OnDisable() { GameStates.OnScoreBreakpoint -= ScoreEventHandler; }
+	void OnDisable() { GameStates.OnScoreBreakpoint -= BoostPlayerStats; 
+					   GameManager.OnResetStreak -= ResetPlayerStats; }
 
-	void ScoreEventHandler(int score)
+	void BoostPlayerStats(int score)
 	{
 		// Do stuff to the player here, most likely just adding/multiplying the 
 		// player's stats by a another predefined stat variable
 		m_Player.Stats += m_BonusStats;
+	}
+
+	void ResetPlayerStats() 
+	{
+		m_Player.Stats = m_Player.OriginalStats;
 	}
 
 }

@@ -18,9 +18,6 @@ public static class GameStates
 	// Static private fields
 	private static int m_SecondsLeft;
 
-	// Constants
-	const string GAME_OVER_SCENE = "GameOver";
-
 	public static IEnumerable MainMenu(MainMenu menu)
 	{
 		while(Running)
@@ -81,7 +78,7 @@ public static class GameStates
 			// End the game if the timer reaches 0
 			if(m_SecondsLeft <= 0)
 			{
-				UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+				GameManager.Current.EndGame();
 			}
 
 			// Check if a second has passed

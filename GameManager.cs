@@ -41,13 +41,14 @@ public class GameManager : MonoBehaviour
 	int    m_ArenaIndex;
 	bool   m_TextIncrementing;
 
+	// Delegates and events
+	public delegate void DefaultEventHandler();
+	public static event DefaultEventHandler OnResetStreak;
+
 	// Constants
+	const string GAME_OVER_SCENE = "GameOver";
 	const string TEXT_GROW = "grow_text";
 	const float  STREAK_BONUS = 2.5f;
-
-	// Unsubscribe from events
-	void OnDisable() { if(m_PlayerController != null) m_PlayerController.OnPlayerGrounded -= OnPlayerGrounded; }
-
 	void Start()
 	{
 		m_Instance = this;
@@ -59,7 +60,6 @@ public class GameManager : MonoBehaviour
 			{
 				m_Player = GameObject.FindGameObjectWithTag("Player");
 				m_PlayerController = m_Player.GetComponent<FirstPersonController>();
-				m_PlayerController.OnPlayerGrounded += OnPlayerGrounded;
 			}
 
 			// Find the main menu, load screen, and arena through the resources system
@@ -116,7 +116,14 @@ public class GameManager : MonoBehaviour
 
 	public void ResetStreak()
 	{
+		if(OnResetStreak != null)
+			OnResetStreak();
 		m_CurrentStreak = 0;
+	}
+
+	public void EndGame() 
+	{
+		UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
 	}
 
 	public void ExitGame()

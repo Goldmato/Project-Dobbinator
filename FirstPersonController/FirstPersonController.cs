@@ -58,10 +58,6 @@ public class FirstPersonController : MonoBehaviour
     bool m_Jumping;
     bool m_Jump;
 
-	// Delegates and events
-	public delegate void PlayerGroundedHandler();
-	public event PlayerGroundedHandler OnPlayerGrounded;
-
 	// Constants
 	const float JUMP_MAX_ACCEL = 5f;
 	const string GAME_OVER_SCENE = "GameOver";
@@ -104,8 +100,7 @@ public class FirstPersonController : MonoBehaviour
 				if(!m_GroundedTrigger)
 				{
 					m_GroundedTrigger = true;
-					if(OnPlayerGrounded != null)
-						OnPlayerGrounded();
+					GameManager.Current.ResetStreak();
 				}
 			}
 			if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)
