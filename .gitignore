@@ -1,8 +1,8 @@
-# Add all files
-*
-
-# Exclude C# related files
-!*/.cs
-!*/.meta
-!*/LICENSE
-!*/README.md
+/*
+!/Assets/
+/Assets/*
+!/Assets/Scripts
+/Assets/Scripts/*
+!/Assets/Scripts/*.cs
+!/Assets/Scripts/*.meta
+!/.gitignore
