@@ -166,7 +166,8 @@ public class FirstPersonController : MonoBehaviour
 				
 			m_MoveDir += Physics.gravity * Stats.gravityMultiplier * Time.fixedDeltaTime;
 		}
-        m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
+		if(m_CharacterController.enabled == true)
+			m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
         UpdateCameraPosition(speed);
 

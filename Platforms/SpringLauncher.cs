@@ -3,8 +3,6 @@
 public class SpringLauncher : MonoBehaviour, IPlatform
 {
 	// Fields and properties
-	[SerializeField] private bool m_DisableDuringAnimation;
-
 	[SerializeField] [Range(1, 1000)] private int m_ScoreValue = 10;
 
 	[SerializeField] [Range(0.001f, 1000f)] private float m_ForceFactor = 100f;
@@ -17,6 +15,8 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	[SerializeField] Transform m_PlatformBase;
 
 	AudioSource m_AudioSource;
+	Renderer[]	m_Renderer;
+
 	Vector3	    m_TargetPos;
 	Vector3     m_TargetScale;
 	Vector3		m_OriginalPos;
@@ -54,6 +54,7 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		{
 			m_OriginalPos = transform.position;
 			m_AudioSource = GetComponent<AudioSource>();
+			m_Renderer = GetComponentsInChildren<Renderer>();
 		}
 	}
 
@@ -66,14 +67,22 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 			m_PlatformBase.localScale = Vector3.SmoothDamp(m_PlatformBase.localScale, m_TargetScale,
 													  ref m_ScaleVelocity, m_SpringTime);
 
+			for(int i = 0; i < m_Renderer.Length; i++)
+			{
+				m_Renderer[i].material.color = new Color(m_Renderer[i].material.color.r, m_Renderer[i].material.color.g,
+														 m_Renderer[i].material.color.b, m_Renderer[i].material.color.a - 0.01f);
+				if(m_Renderer[i].material.color.a <= 0.01f)
+					m_PlatformBase.GetComponent<Collider>().enabled = false;
+			}
+
 			if (Vector3.Distance(transform.position, m_TargetPos) <= 0.1f)
 			{
 				// Debug.Log("Platform reached end of Stage " + ((STAGE_ONE + 1) - m_MovePlatform));
 				m_TargetPos = m_OriginalPos;
 				m_TargetScale = m_OriginalScale;
 				m_MovePlatform--;
-				if(m_MovePlatform > DISABLED)
-					m_PlatformBase.GetComponent<Collider>().enabled = true;
+				if(m_MovePlatform <= DISABLED)
+					Destroy(gameObject);
 			}
 		}
 	}
@@ -84,12 +93,17 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		// apply a "spring" effect to the platform
 		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
+			// Disable shadows and collisions
+			for(int i = 0; i < m_Renderer.Length; i++)
+			{
+				m_Renderer[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+			}
+			m_PlatformBase.GetComponent<Collider>().enabled = false;
+
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
 			if(m_MovePlatform <= DISABLED)
 				PlatformSpringEffect();
-			if(m_DisableDuringAnimation)
-				m_PlatformBase.GetComponent<Collider>().enabled = false;
 			GameManager.Current.AddScore(m_ScoreValue);
 		}
 	}
