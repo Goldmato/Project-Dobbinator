@@ -289,7 +289,6 @@ public class FirstPersonController : MonoBehaviour
 		if(!m_GameOverFlag && other.gameObject.CompareTag("DeathZone"))
 		{
 			m_GameOverFlag = true;
-			m_CharacterController.enabled = false;
 			StartCoroutine("GameOver");
 		}
 
@@ -332,6 +331,6 @@ public class FirstPersonController : MonoBehaviour
 	private IEnumerator GameOver()
 	{
 		yield return new WaitForSeconds(m_GameOverDelay);
-		UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+		GameManager.Current.EndGame();
 	}
 }
