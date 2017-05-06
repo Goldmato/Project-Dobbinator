@@ -31,6 +31,7 @@ public class PlatformGenerator : MonoBehaviour
 
 	int m_GroundPlatformsSpawned;
 	int m_SkyPlatformsSpawned;
+	int m_SkyLayerIndex;
 
 	const float DELAY = 0.25f;
 
@@ -70,10 +71,10 @@ public class PlatformGenerator : MonoBehaviour
 		var col = GetComponent<Collider>();
 		m_SkyLayerHeight = (m_DynamicTerrain.TerrainHeightScale * col.bounds.size.y) + m_SkyPlatformBaseHeightOffset;
 		
-		for(int i = 0; i < m_SkyPlatformLayers; i++)
+		for(m_SkyLayerIndex = 0; m_SkyLayerIndex < m_SkyPlatformLayers; m_SkyLayerIndex++)
 		{
-			GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (i + 1) + "]";
-			GameManager.Current.LoadValue = baseLoadValue + ((1.0f / m_SkyPlatformLayers * i) * (1.0f - baseLoadValue));
+			GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (m_SkyLayerIndex + 1) + "]";
+			GameManager.Current.LoadValue = baseLoadValue + ((1.0f / m_SkyPlatformLayers * m_SkyLayerIndex) * (1.0f - baseLoadValue));
 			SpawnSkyPlatformLayer();
 			yield return new WaitForSeconds(DELAY);
 		}
@@ -173,7 +174,13 @@ public class PlatformGenerator : MonoBehaviour
 					int randX = Random.Range(x + scanEmptySpace, (x + m_ScanSquareExtent) - scanEmptySpace);
 					int randZ = Random.Range(z + scanEmptySpace, (z + m_ScanSquareExtent) - scanEmptySpace);
 
-					Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity);
+					var platform = Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], 
+											   new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity) as GameObject;
+					if(m_SkyLayerIndex == m_SkyPlatformLayers - 1 &&
+					   GameManager.Current.PortalPlatform == null)
+					{
+						GameManager.Current.PortalPlatform = platform;
+					}
 
 					spawnChance = m_SkyPlatformSpawnChance;
 					m_SkyPlatformsSpawned++;

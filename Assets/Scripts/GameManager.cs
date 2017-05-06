@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
 	private static GameManager m_Instance;
 
 	public GameObject StartPlatform { get { return m_StartPlatform; } set { m_StartPlatform = value; } }
+	public GameObject PortalPlatform { get { return m_PortalPlatform; } set { m_PortalPlatform = value; } }
 
 	public string LoadState { get { return m_LoadState; } set { m_LoadState = value; } }
 	public float  LoadValue { get { return m_LoadValue; } set { m_LoadValue = value; } }
@@ -25,12 +26,15 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private GameObject m_LoadScreenPrefab;
 	[SerializeField] private GameObject m_GameCanvasPrefab;
 	[SerializeField] private GameObject m_ArenaPrefab;
+	[SerializeField] private GameObject m_PortalPrefab;
 	[SerializeField] private GameObject m_Player;
 
 	List<GameObject> m_Arena = new List<GameObject>();
 	FirstPersonController m_PlayerController;
 	GameObject m_StartPlatform;
+	GameObject m_PortalPlatform;
 	GameCanvas m_GameCanvas;
+	Portal     m_CurrentPortal;
 
 	string m_LoadState;
 	float  m_LoadValue;
@@ -65,6 +69,8 @@ public class GameManager : MonoBehaviour
 			// Find the main menu, load screen, and arena through the resources system
 			if(m_ArenaPrefab == null)
 				m_ArenaPrefab = Resources.Load<GameObject>("Structures/arena_01");
+			if(m_PortalPrefab == null)
+				m_PortalPrefab = Resources.Load<GameObject>("Structures/portal_01");
 			if(m_MainMenuPrefab == null)
 				m_MainMenuPrefab = Resources.Load<GameObject>("UI/main_menu");
 			if(m_LoadScreenPrefab == null)
@@ -209,6 +215,22 @@ public class GameManager : MonoBehaviour
 														new Vector3(tData.size.x / 2, tData.size.y, tData.size.z / 2));
 
 		}
+
+		// Spawn a single portal at the platform set by PlatformGenerator
+		if(PortalPlatform != null)
+		{
+			// If there's already a portal, unsubscribe from any events
+			if(m_CurrentPortal != null) 
+			{
+				m_CurrentPortal.OnPortalActivated -= EndGame;
+			}
+
+			m_CurrentPortal = Instantiate(m_PortalPrefab, PortalPlatform.transform).GetComponent<Portal>();
+			m_CurrentPortal.OnPortalActivated += EndGame;
+			
+			Debug.Log("Portal spawned at:" + PortalPlatform.transform.position);
+		}
+
 		SetGameState(MainGame());
 	}
 
