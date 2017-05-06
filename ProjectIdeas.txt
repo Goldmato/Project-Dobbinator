@@ -1,0 +1,54 @@
+- Portal in the middle of roof that transports the player to another arena
+	- New arena is possibly different in some way?
+		- Different colors?
+		- Different platforms?
+		- Seasonal arenas?
+			- Goes to boss fight after final season
+			- Avoid falling into monster's mouth in the boss fight
+				- Giant worm or something that time travels
+				- Boss eats platform over time to instill time limit
+			- Platform aesthetics match seasonal theme
+				- Summer platform = tree leaf?
+
+- Sky is visible during level, but at the end of the level the sky is covered
+  and portal appears, with lighting changes
+  	- Vortex portal?
+
+- Easy mode that shows your shadow
+
+- Portal takes player to Serious Sam 1 end boss fight
+
+- Mushroom platforms in the forest
+	- Trying to get acorns and plant them from the air to create more platforms
+	- Leaves to glide on?
+	- Negative powerups
+	- Avoid landing on pine sap
+
+- One goal of game is to regain flight (you're a gosling or something)
+	- Jump into bird's nest to do something
+
+- Terrain becomes harsher and more menacing as player progresses
+
+- Have to save worms by pouring dirt on them 
+	- Fill world up with sand to get around
+
+- Aerial cinematic view of the first arena at beginning of game
+
+- Candyland made of of bubblegum 
+	- Can make bubbles out of the gum to float in
+
+- Little Shia LeBoufs dancing everywhere (April fool's level???)
+
+- Lava rises as time progresses, so the player has to hurry to the portal
+
+- Streak bonus represented as a meter which isn't reset if player touches ground
+	- Different sound effects after streak ends depending on final streak score?
+
+- Platforms on terrain are used to reach sky platforms
+	- Sky platforms continue on for several levels, with the spawner/portal for the next
+	arena at the top
+	- Player should probably be able to jump between arenas with the potential risk of falling
+	into the void
+	- Sky platforms need to be spaced far enough apart to pose a risk of dropping down into the
+	lava 
+	- Maybe make terrain more "island-y" so there are fewer safe spaces and ground platforms
