@@ -5,11 +5,11 @@ using UnityEngine;
 
 public class DynamicTerrain : MonoBehaviour
 {
-	// Public fields
-	public Collider    m_WallTop, m_WallRight;
-	public Transform   m_DeathZone;
-	
+	// Public properties
+	public float TerrainHeightScale { get { return m_TerrainHeight; } }
+
 	// Private serialized fields
+	[SerializeField] private Transform m_DeathZone;
 	[SerializeField] private Texture2D[] m_SplatTextures;
 	[SerializeField] [Range(0.01f, 1f)] private float m_BorderHeight = 0.1f;
 	[SerializeField] [Range(0.01f, 1f)] private float m_TerrainHeight = 0.5f;
@@ -35,21 +35,8 @@ public class DynamicTerrain : MonoBehaviour
 		// Otherwise, throw a new exception error and pause the game
 		List<string> missingChildren = new List<string>();
 
-		//TODO: Clean this up
 		try
 		{
-			if (m_WallTop == null)
-			{
-				m_WallTop = transform.FindChild(WALL_TOP_NAME).GetComponent<Collider>();
-				if(m_WallTop == null)
-					missingChildren.Add(WALL_TOP_NAME);
-			}
-			if (m_WallRight == null)
-			{
-				m_WallRight = transform.FindChild(WALL_RIGHT_NAME).GetComponent<Collider>();
-				if(m_WallRight == null)
-					missingChildren.Add(WALL_RIGHT_NAME);
-			}
 			if(m_DeathZone == null)
 			{
 				m_DeathZone = transform.FindChild(DEATH_ZONE_NAME);
@@ -122,9 +109,10 @@ public class DynamicTerrain : MonoBehaviour
 	void BuildTerrainData()
 	{
 		// Calculate the resolutions and terrain size based on the distance between arena walls
-		int mapResX = Mathf.RoundToInt(m_WallTop.bounds.size.x);
-		int mapResY = Mathf.RoundToInt(m_WallTop.bounds.size.y * m_TerrainHeight);
-		int mapResZ = Mathf.RoundToInt(m_WallRight.bounds.size.z);
+		var col = GetComponent<Collider>();
+		int mapResX = Mathf.RoundToInt(col.bounds.size.x);
+		int mapResY = Mathf.RoundToInt(col.bounds.size.y * m_TerrainHeight);
+		int mapResZ = Mathf.RoundToInt(col.bounds.size.z);
 
 		m_TerrainData.heightmapResolution = mapResX / 2 + 1;
 		m_TerrainData.baseMapResolution = mapResX / 2 + 1;
@@ -135,9 +123,11 @@ public class DynamicTerrain : MonoBehaviour
 		m_TerrainBorderHeight = m_BorderHeight * m_TerrainData.size.y;
 
 		// Scale the deathzone height to the border height
-		m_DeathZone.transform.localScale = new Vector3(m_DeathZone.transform.localScale.x,
-													   m_TerrainData.size.y / m_TerrainBorderHeight,
-													   m_DeathZone.transform.localScale.z);
+		m_DeathZone.localScale = new Vector3(m_DeathZone.localScale.x,
+											(m_TerrainData.size.y / m_TerrainBorderHeight) - 1,
+											 m_DeathZone.localScale.z);
+		m_DeathZone.position = new Vector3(m_DeathZone.position.x, m_DeathZone.localScale.y / 2, 
+										   m_DeathZone.position.z);
 	}
 
 	void BuildSplats()

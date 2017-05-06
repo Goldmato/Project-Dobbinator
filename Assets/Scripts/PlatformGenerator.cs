@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlatformGenerator : MonoBehaviour
 {
 	// Fields and properties 
-	[SerializeField] [Range(-1000f, 1000f)] float m_SkyPlatformBaseHeight;
+	[SerializeField] [Range(-1000f, 1000f)] float m_SkyPlatformBaseHeightOffset;
 	[SerializeField] [Range(0.001f, 1000f)] float m_SkyPlatformHeightInterval;
 	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnChance;
 	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnEntropy;
@@ -19,7 +19,6 @@ public class PlatformGenerator : MonoBehaviour
 
 	[SerializeField] List<GameObject> m_GroundPlatforms;
 	[SerializeField] List<GameObject> m_SkyPlatforms;
-	[SerializeField] GameObject		  m_Player;
 
 	IEnumerable m_CurrentState;
 
@@ -39,10 +38,6 @@ public class PlatformGenerator : MonoBehaviour
 	{
 		m_DynamicTerrain = GetComponent<DynamicTerrain>();
 
-		// If there is no reference to the main player gameObject, find it via tag
-		if (m_Player == null)
-			m_Player = GameObject.FindGameObjectWithTag("Player");
-
 		// Set the inital state and run the state machine
 		StartCoroutine(GenerateStuctures());
 	}
@@ -59,8 +54,6 @@ public class PlatformGenerator : MonoBehaviour
 			yield return new WaitForSeconds(0.1f);
 		}
 
-		m_SkyLayerHeight = m_TerrainData.size.y + m_SkyPlatformBaseHeight;
-
 		// Find all points on the map which would be considered "hill peaks" by the algorithm
 		GameManager.Current.LoadState = "Calculating Hill Peaks";
 		GameManager.Current.LoadValue = 0.6f;
@@ -74,6 +67,9 @@ public class PlatformGenerator : MonoBehaviour
 		yield return new WaitForSeconds(DELAY);
 
 		var baseLoadValue = GameManager.Current.LoadValue;
+		var col = GetComponent<Collider>();
+		m_SkyLayerHeight = (m_DynamicTerrain.TerrainHeightScale * col.bounds.size.y) + m_SkyPlatformBaseHeightOffset;
+		
 		for(int i = 0; i < m_SkyPlatformLayers; i++)
 		{
 			GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (i + 1) + "]";
