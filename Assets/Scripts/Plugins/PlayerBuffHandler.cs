@@ -31,6 +31,7 @@ public class PlayerBuffHandler : MonoBehaviour
 
 	void ResetPlayerStats() 
 	{
+		// Reset the players stats
 		m_Player.Stats = m_Player.OriginalStats;
 	}
 
