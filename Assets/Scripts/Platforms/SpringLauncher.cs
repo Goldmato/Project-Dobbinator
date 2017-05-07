@@ -115,6 +115,11 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		m_MovePlatform = STAGE_ONE;
 	}
 
+	public void SelfDestruct() 
+	{
+		Destroy(this);
+	}
+
 	IEnumerator DisablePlatform() 
 	{
 		var col = m_PlatformBase.GetComponent<Collider>();

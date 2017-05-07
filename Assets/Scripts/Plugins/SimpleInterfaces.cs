@@ -9,4 +9,6 @@ public interface IInitializable
 public interface IPlatform
 {
 	void PlayerBoost(FirstPersonController character);
+
+	void SelfDestruct();
 }

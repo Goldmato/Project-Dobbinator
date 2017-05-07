@@ -219,13 +219,20 @@ public class GameManager : MonoBehaviour
 		// Spawn a single portal at the platform set by PlatformGenerator
 		if(PortalPlatform != null)
 		{
+			// Remove the platform script from the portal platform
+			PortalPlatform.GetComponent<IPlatform>().SelfDestruct();
+
 			// If there's already a portal, unsubscribe from any events
 			if(m_CurrentPortal != null) 
 			{
 				m_CurrentPortal.OnPortalActivated -= EndGame;
 			}
 
-			m_CurrentPortal = Instantiate(m_PortalPrefab, PortalPlatform.transform).GetComponent<Portal>();
+			m_CurrentPortal = Instantiate(m_PortalPrefab, PortalPlatform.transform.position,
+										  PortalPlatform.transform.rotation).GetComponent<Portal>();
+			
+			// Move the portal above the platform based on its height
+			m_CurrentPortal.transform.Translate(new Vector3(0, m_CurrentPortal.GetComponent<Collider>().bounds.size.y, 0));
 			m_CurrentPortal.OnPortalActivated += EndGame;
 			
 			Debug.Log("Portal spawned at:" + PortalPlatform.transform.position);
