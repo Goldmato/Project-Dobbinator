@@ -1,29 +1,26 @@
 ﻿using UnityEngine;
 
-public class ResizingPlatform : MonoBehaviour, IInitializable
+public class ResizingPlatform : Platform
 {
 	// Fields and properties
-	Transform platformBase;
-	Vector3   originalScale;
-	bool      scriptEnabled;
-	int       scaleIndex;
+	Vector3   m_OriginalScale;
+	int       m_ScaleIndex;
 
-	public void Initialize()
+	protected override void Start()
 	{
-		// Initialization method to be called remotely (by the Platform generator)
-		scaleIndex = Random.Range(0, PlatformController.Instance.CurrentScaleFactor.Length);
-		platformBase = transform.Find("platform_base");
-		originalScale = platformBase.localScale;
-		scriptEnabled = true;
+		base.Start();
+		m_OriginalScale = m_PlatformBase.transform.localScale;
+		m_ScaleIndex = Random.Range(0, PlatformController.Instance.CurrentScaleFactor.Length);
+		
 	}
 	
 	void FixedUpdate()
 	{
-		// Only run if the script is enabled
-		if(scriptEnabled && PlatformController.Instance != null)
+		// Only run if the PlatformController exists
+		if(PlatformController.Instance != null)
 		{
-			platformBase.localScale = originalScale * 
-									  PlatformController.Instance.CurrentScaleFactor[scaleIndex];
+			m_PlatformBase.localScale = m_OriginalScale * 
+									    PlatformController.Instance.CurrentScaleFactor[m_ScaleIndex];
 		}
 	}
 }

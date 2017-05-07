@@ -6,6 +6,7 @@ public static class GameStates
 {
 	// Static public properties
 	public static int SecondsLeft { get { return m_SecondsLeft; } }
+	public static bool ScoreBreakpoints { set { m_ScoreBreakpointFlag = value; } }
 
 	// Static public fields
 	public static bool Running = true;
@@ -17,6 +18,7 @@ public static class GameStates
 
 	// Static private fields
 	private static int m_SecondsLeft;
+	private static bool m_ScoreBreakpointFlag;
 
 	public static IEnumerable MainMenu(MainMenu menu)
 	{
@@ -94,7 +96,7 @@ public static class GameStates
 
 			if(GameManager.Current.Score >= scoreBreakpoint)
 			{
-				if(OnScoreBreakpoint != null)
+				if(m_ScoreBreakpointFlag && OnScoreBreakpoint != null)
 				{
 					// Debug.Log("OnScoreEvent() Called!");
 					OnScoreBreakpoint(GameManager.Current.Score);

@@ -100,8 +100,21 @@ public class GameManager : MonoBehaviour
 	}
 
 	// Add score and multiply it by a streak bonus
-	public void AddScore(int score)
+	public void AddScore(int score, PlatformType platType)
 	{
+		// Enable/Disable score breakpoint events based on platform type
+		switch(platType)
+		{
+			case PlatformType.Ground:
+				GameStates.ScoreBreakpoints = true;
+				break;
+			case PlatformType.Sky:
+				GameStates.ScoreBreakpoints = false;
+				if(OnResetStreak != null)
+					OnResetStreak();
+				break;
+		}
+
 		m_CurrentStreak++;
 		m_StreakBonus = m_CurrentStreak * STREAK_BONUS;
 		if(m_GameCanvas != null)
@@ -220,7 +233,7 @@ public class GameManager : MonoBehaviour
 		if(PortalPlatform != null)
 		{
 			// Remove the platform script from the portal platform
-			PortalPlatform.GetComponent<IPlatform>().SelfDestruct();
+			Destroy(PortalPlatform.GetComponent<Platform>());
 
 			// If there's already a portal, unsubscribe from any events
 			if(m_CurrentPortal != null) 
@@ -245,7 +258,7 @@ public class GameManager : MonoBehaviour
 	{
 		var canvas = Instantiate(m_GameCanvasPrefab) as GameObject;
 		m_GameCanvas = canvas.GetComponent<GameCanvas>();
-		AddScore(0);
+		m_GameCanvas.ScoreText.text = "Score: 0";
 
 		foreach(var current in GameStates.MainGame(m_ArenaTimer, m_MinScore, 50, 25))
 		{

@@ -27,12 +27,14 @@ public class PlayerBuffHandler : MonoBehaviour
 		// Do stuff to the player here, most likely just adding/multiplying the 
 		// player's stats by a another predefined stat variable
 		m_Player.Stats += m_BonusStats;
+		Debug.Log("Boosting Player Stats!");
 	}
 
 	void ResetPlayerStats() 
 	{
 		// Reset the players stats
 		m_Player.Stats = m_Player.OriginalStats;
+		Debug.Log("Resetting Player Stats!");
 	}
 
 }

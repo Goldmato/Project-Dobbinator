@@ -11,11 +11,10 @@ public class FirstPersonController : MonoBehaviour
 {
 	// Properties
 	public PlayerStats OriginalStats { get { return m_OriginalStats; } }
-
-	// Public fields
-	public PlayerStats Stats;
+	public PlayerStats Stats { get { return m_PlayerStats; } set { m_PlayerStats = value; } }
 
 	// Private serialized fields
+	[SerializeField] private PlayerStats m_PlayerStats;
 	[SerializeField] [Range(0.001f, 10f)] private float m_GameOverDelay = 0.5f;
 	[SerializeField] private bool m_IsWalking;
     [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
@@ -65,7 +64,7 @@ public class FirstPersonController : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
-		m_OriginalStats = Stats;
+		m_OriginalStats = m_PlayerStats;
         m_CharacterController = GetComponent<CharacterController>();
         m_Camera = Camera.main;
         m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -145,7 +144,7 @@ public class FirstPersonController : MonoBehaviour
 			m_MoveDir.z = newSpeed.y;
 			if (m_Jump)
 			{
-				m_MoveDir.y = Stats.jumpSpeed;
+				m_MoveDir.y = m_PlayerStats.jumpSpeed;
 				PlayJumpSound();
 				m_Jump = false;
 				m_Jumping = true;
@@ -164,7 +163,7 @@ public class FirstPersonController : MonoBehaviour
 
 			m_MoveDir.z = Mathf.Lerp(m_MoveDir.z, newSpeed.y, m_ForceInterpolation);
 				
-			m_MoveDir += Physics.gravity * Stats.gravityMultiplier * Time.fixedDeltaTime;
+			m_MoveDir += Physics.gravity * m_PlayerStats.gravityMultiplier * Time.fixedDeltaTime;
 		}
 		if(m_CharacterController.enabled == true)
 			m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
@@ -256,9 +255,9 @@ public class FirstPersonController : MonoBehaviour
 #endif
 		// set the desired speed to be walking or running
 		if(!m_ForceJumping)
-			speed = m_IsWalking ? Stats.walkSpeed : Stats.runSpeed;
+			speed = m_IsWalking ? m_PlayerStats.walkSpeed : m_PlayerStats.runSpeed;
 		else
-			speed = Stats.flySpeed;
+			speed = m_PlayerStats.flySpeed;
         m_Input = new Vector2(horizontal, vertical);
 
         // normalize input if it exceeds 1 in combined length:
@@ -292,7 +291,7 @@ public class FirstPersonController : MonoBehaviour
 			StartCoroutine("GameOver");
 		}
 
-		var platform = other.gameObject.GetComponentInParent<IPlatform>();
+		var platform = other.gameObject.GetComponentInParent<Platform>();
 		if(platform != null)
 		{
 			platform.PlayerBoost(this);
@@ -324,7 +323,7 @@ public class FirstPersonController : MonoBehaviour
 			return false;
 
 		m_ForceTimer = Time.timeSinceLevelLoad + m_ForceCooldown;
-		m_MoveDir = force * Stats.forceMultiplier;
+		m_MoveDir = force * m_PlayerStats.forceMultiplier;
 		return true;
 	}
 

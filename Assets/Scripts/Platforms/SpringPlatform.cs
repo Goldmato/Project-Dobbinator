@@ -2,23 +2,13 @@
 
 using UnityEngine;
 
-public class SpringLauncher : MonoBehaviour, IPlatform
+public class SpringPlatform : Platform
 {
 	// Fields and properties
-	[SerializeField] [Range(1, 1000)] private int m_ScoreValue = 10;
-
-	[SerializeField] [Range(0.001f, 1000f)] private float m_ForceFactor = 100f;
 	[SerializeField] [Range(0.001f, 100f)]  private float m_DisableDelay = 10f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringDistance = 2.5f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_SpringTime = 2.5f;
 	[SerializeField] [Range(0.001f, 5f)]    private float m_ScaleFactor = 1.5f;
-	[SerializeField] [Range(0.001f, 2f)]    private float m_SoundPitchLow = 0.5f;
-	[SerializeField] [Range(0.001f, 2f)]    private float m_SoundPitchHigh = 1.5f;
-
-	[SerializeField] Transform m_PlatformBase;
-
-	AudioSource m_AudioSource;
-	Renderer[]	m_Renderer;
 
 	Vector3	    m_TargetPos;
 	Vector3     m_TargetScale;
@@ -28,38 +18,14 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 	Vector3     m_ScaleVelocity;
 	byte		m_MovePlatform = DISABLED;
 
-	static bool m_NullExceptionFlag;
-
 	const byte  STAGE_ONE = 2, STAGE_TWO = 1, DISABLED = 0;
 	const float MIN_ALPHA = 0.5f;
 
-	void Start()
+	protected override void Start()
 	{
-		// Simple check and error handling for assigning the platform base transform
-		try
-		{
-			if(m_PlatformBase == null)
-				m_PlatformBase = transform.FindChild("platform_base");
-			m_OriginalScale = m_PlatformBase.localScale;
-		}
-		catch(System.NullReferenceException exception)
-		{
-			Debug.Break();
-			m_PlatformBase = this.transform;
-			string errMessage = ("Please either assign a transform to the 'Platform Base' field or rename " +
-						         "the relevant child object to 'platform_base'");
-			if(!m_NullExceptionFlag)
-			{
-				m_NullExceptionFlag = true;
-				throw new System.Exception(errMessage, exception);
-			}
-		}
-		finally
-		{
-			m_OriginalPos = transform.position;
-			m_AudioSource = GetComponent<AudioSource>();
-			m_Renderer = GetComponentsInChildren<Renderer>();
-		}
+		base.Start();
+		m_OriginalScale = m_PlatformBase.localScale;
+		m_OriginalPos = transform.position;
 	}
 
 	void FixedUpdate()
@@ -90,23 +56,23 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		}
 	}
 
-	public void PlayerBoost(FirstPersonController character)
+	public override void PlayerBoost(FirstPersonController character)
 	{
 		// If ApplyForce isn't on cooldown, play the main audio clip and 
 		// apply a "spring" effect to the platform and disable the collider
 		// and shadow rendering
 		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
+			if(m_MovePlatform <= DISABLED)
+				StartSpringEffect();
 			StartCoroutine(DisablePlatform());
+			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType);
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
-			if(m_MovePlatform <= DISABLED)
-				PlatformSpringEffect();
-			GameManager.Current.AddScore(m_ScoreValue);
 		}
 	}
 
-	void PlatformSpringEffect()
+	void StartSpringEffect()
 	{
 		m_TargetPos  =  transform.position - (transform.up * m_SpringDistance);
 		m_TargetScale = m_PlatformBase.localScale * m_ScaleFactor;
@@ -115,12 +81,7 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		m_MovePlatform = STAGE_ONE;
 	}
 
-	public void SelfDestruct() 
-	{
-		Destroy(this);
-	}
-
-	IEnumerator DisablePlatform() 
+    IEnumerator DisablePlatform() 
 	{
 		var col = m_PlatformBase.GetComponent<Collider>();
 
@@ -129,6 +90,7 @@ public class SpringLauncher : MonoBehaviour, IPlatform
 		{
 			m_Renderer[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 		}
+
 		col.enabled = false;
 		yield return new WaitForSeconds(m_DisableDelay);
 		col.enabled = true;
