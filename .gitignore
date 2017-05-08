@@ -6,6 +6,7 @@
 !/Assets/Scripts
 !/Assets/Libraries
 !/.gitignore
+!/.collabignore
 !/README.md
 !/LICENSE
 !/ProjectIdeas.txt
