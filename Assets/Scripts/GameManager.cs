@@ -255,21 +255,21 @@ public class GameManager : MonoBehaviour
 		m_GameCanvas = canvas.GetComponent<GameCanvas>();
 		m_GameCanvas.ScoreText.text = "Score: 0";
 
-		foreach(var current in GameStates.MainGame(m_ArenaTimer, m_MinScore, 50, 25))
+		foreach(var current in GameStates.MainGame(m_ArenaTimer, 50, 25))
 		{
 			yield return current;
 		}
 
-		// If there's a portal, disable it by destroying its portal component
-		// and removing the public gameObject reference
+		// If there's a portal, disable its portal component
+		// and remove the public gameObject reference
 		if(m_CurrentPortal != null) 
 		{
-			Destroy(m_CurrentPortal);
+			m_CurrentPortal.enabled = false;
 			m_PortalPlatform = null;
 		}
 
-		m_Player.SetActive(false);
 		Destroy(canvas);
+		m_Player.SetActive(false);
 		m_MinScore *= 2;
 
 		m_ArenaIndex++;

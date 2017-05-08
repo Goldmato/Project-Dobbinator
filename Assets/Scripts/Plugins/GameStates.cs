@@ -66,7 +66,7 @@ public static class GameStates
 			
 	}
 
-	public static IEnumerable MainGame(int startSeconds, int minScore, int scoreBreakpoint, int scoreInterval)
+	public static IEnumerable MainGame(int startSeconds, int scoreBreakpoint, int scoreInterval)
 	{
 		m_SecondsLeft = startSeconds;
 		float secondBreakpoint = Time.timeSinceLevelLoad;
@@ -74,12 +74,6 @@ public static class GameStates
 		Running = true;
 		while(Running)
 		{
-			// Continue to next arena if minScore is reached
-			if(GameManager.Current.Score >= minScore)
-			{
-				break;
-			}
-
 			// End the game if the timer reaches 0
 			if(m_SecondsLeft <= 0)
 			{
