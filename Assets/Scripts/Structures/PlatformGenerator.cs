@@ -129,6 +129,10 @@ public class PlatformGenerator : MonoBehaviour
 
 	void SpawnGroundPlatformLayer()
 	{
+		// Create a container to hold all the ground platforms
+		var groundPlatformContainer = new GameObject("ground_platforms");
+		groundPlatformContainer.transform.position = Vector3.zero;
+
 		// Create a random Platform at each hill point
 		foreach (Vector3 pos in m_HillPeaks)
 		{
@@ -140,6 +144,7 @@ public class PlatformGenerator : MonoBehaviour
 			// Debug.Log(string.Format("X Rotation: {0}, Z Rotation: {1}", rotX, rotZ));
 			GameObject newPlatform = Instantiate(m_GroundPlatforms[Random.Range(0, m_GroundPlatforms.Count)], peakPos,
 								   Quaternion.Euler(0, Random.Range(0, 360), 0)) as GameObject;
+			newPlatform.transform.SetParent(groundPlatformContainer.transform);
 
 			// Set the start platform if null
 			if(GameManager.Current.StartPlatform == null)
@@ -161,6 +166,9 @@ public class PlatformGenerator : MonoBehaviour
 
 	void SpawnSkyPlatformLayer()
 	{
+		var skyPlatformContainer = new GameObject("sky_platforms [" + (m_SkyLayerIndex + 1) + "]");
+		skyPlatformContainer.transform.position = new Vector3(0, m_SkyLayerHeight, 0);
+
 		float spawnChance = m_SkyPlatformSpawnChance;
 		int scanEmptySpace = m_ScanSquareInnerExtent * 2 + 1;
 
@@ -176,6 +184,8 @@ public class PlatformGenerator : MonoBehaviour
 
 					var platform = Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], 
 											   new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity) as GameObject;
+					platform.transform.SetParent(skyPlatformContainer.transform);
+					
 					if(m_SkyLayerIndex == m_SkyPlatformLayers - 1 &&
 					   GameManager.Current.PortalPlatform == null)
 					{
