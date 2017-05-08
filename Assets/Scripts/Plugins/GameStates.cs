@@ -22,6 +22,7 @@ public static class GameStates
 
 	public static IEnumerable MainMenu(MainMenu menu)
 	{
+		Running = true;
 		while(Running)
 		{
 			if(menu.PlayButtonPressed)
@@ -41,6 +42,7 @@ public static class GameStates
 		var progress = "";
 		var barSpeed = 0f;
 
+		Running = true;
 		while(Running)
 		{
 			if(loadScreen.ExitButtonPressed)
@@ -69,6 +71,7 @@ public static class GameStates
 		m_SecondsLeft = startSeconds;
 		float secondBreakpoint = Time.timeSinceLevelLoad;
 
+		Running = true;
 		while(Running)
 		{
 			// Continue to next arena if minScore is reached

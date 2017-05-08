@@ -235,18 +235,13 @@ public class GameManager : MonoBehaviour
 			// Remove the platform script from the portal platform
 			Destroy(PortalPlatform.GetComponent<Platform>());
 
-			// If there's already a portal, unsubscribe from any events
-			if(m_CurrentPortal != null) 
-			{
-				m_CurrentPortal.OnPortalActivated -= EndGame;
-			}
-
 			m_CurrentPortal = Instantiate(m_PortalPrefab, PortalPlatform.transform.position,
 										  PortalPlatform.transform.rotation).GetComponent<Portal>();
 			
 			// Move the portal above the platform based on its height
 			m_CurrentPortal.transform.Translate(new Vector3(0, m_CurrentPortal.GetComponent<Collider>().bounds.size.y, 0));
-			m_CurrentPortal.OnPortalActivated += EndGame;
+
+			m_CurrentPortal.OnPortalActivated += () => { GameStates.Running = false; };
 			
 			Debug.Log("Portal spawned at:" + PortalPlatform.transform.position);
 		}
@@ -263,6 +258,14 @@ public class GameManager : MonoBehaviour
 		foreach(var current in GameStates.MainGame(m_ArenaTimer, m_MinScore, 50, 25))
 		{
 			yield return current;
+		}
+
+		// If there's a portal, disable it by destroying its portal component
+		// and removing the public gameObject reference
+		if(m_CurrentPortal != null) 
+		{
+			Destroy(m_CurrentPortal);
+			m_PortalPlatform = null;
 		}
 
 		m_Player.SetActive(false);
