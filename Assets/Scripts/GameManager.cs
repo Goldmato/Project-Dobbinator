@@ -260,11 +260,9 @@ public class GameManager : MonoBehaviour
 			yield return current;
 		}
 
-		// If there's a portal, disable its portal component
-		// and remove the public gameObject reference
+		// If there's a portal, remove the public gameObject reference
 		if(m_CurrentPortal != null) 
 		{
-			m_CurrentPortal.enabled = false;
 			m_PortalPlatform = null;
 		}
 
