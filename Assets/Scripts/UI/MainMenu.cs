@@ -19,13 +19,13 @@ public class MainMenu : MonoBehaviour
 		switch(m_Difficulty) 
 		{
 			case "Easy":
-				m_EasyToggle.Select();
+				m_EasyToggle.isOn = true;
 				break;
 			case "Medium":
-				m_MediumToggle.Select();
+				m_MediumToggle.isOn = true;
 				break;
 			case "Hard":
-				m_HardToggle.Select();
+				m_HardToggle.isOn = true;
 				break;
 		}
 	}
