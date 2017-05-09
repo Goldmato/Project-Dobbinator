@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour
 	const string GAME_OVER_SCENE = "GameOver";
 	const string TEXT_GROW = "grow_text";
 	const float  STREAK_BONUS = 2.5f;
+	
 	void Start()
 	{
 		m_Instance = this;
