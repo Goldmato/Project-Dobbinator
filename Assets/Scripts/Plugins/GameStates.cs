@@ -20,23 +20,6 @@ public static class GameStates
 	private static int m_SecondsLeft;
 	private static bool m_ScoreBreakpointFlag;
 
-	public static IEnumerable MainMenu(MainMenu menu)
-	{
-		Running = true;
-		while(Running)
-		{
-			if(menu.PlayButtonPressed)
-			{
-				break;
-			}
-			if(menu.ExitButtonPressed)
-			{
-				GameManager.Current.ExitGame();
-			}
-			yield return null;
-		}
-	}
-
 	public static IEnumerable LoadingScreen(LoadingScreen loadScreen) 
 	{
 		var progress = "";

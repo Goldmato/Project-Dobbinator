@@ -16,13 +16,17 @@ public class GameManager : MonoBehaviour
 
 	public string LoadState { get { return m_LoadState; } set { m_LoadState = value; } }
 	public float  LoadValue { get { return m_LoadValue; } set { m_LoadValue = value; } }
+	public float  DifficultyFactor { get { return m_DiffFactor; } }
 	public int Score { get { return m_CurrentScore; } }
 	public int Streak { get { return m_CurrentStreak; } }
 
 	// Private serialized fields
 	[SerializeField] [Range(1, 1000)] private int m_ArenaTimer = 300;
 
-	[SerializeField] private GameObject m_MainMenuPrefab;
+	[SerializeField] [Range(1, 5)] private float m_EasyDiffFactor = 1f;
+	[SerializeField] [Range(1, 5)] private float m_MediumDiffFactor = 2.5f;
+	[SerializeField] [Range(1, 5)] private float m_HardDiffFactor = 5f;
+
 	[SerializeField] private GameObject m_LoadScreenPrefab;
 	[SerializeField] private GameObject m_GameCanvasPrefab;
 	[SerializeField] private GameObject m_ArenaPrefab;
@@ -38,6 +42,7 @@ public class GameManager : MonoBehaviour
 
 	string m_LoadState;
 	float  m_LoadValue;
+	float  m_DiffFactor;
 	float  m_StreakBonus;
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
@@ -66,13 +71,11 @@ public class GameManager : MonoBehaviour
 				m_PlayerController = m_Player.GetComponent<FirstPersonController>();
 			}
 
-			// Find the main menu, load screen, and arena through the resources system
+			// Find all necessary resources if not assigned
 			if(m_ArenaPrefab == null)
 				m_ArenaPrefab = Resources.Load<GameObject>("Structures/arena_01");
 			if(m_PortalPrefab == null)
 				m_PortalPrefab = Resources.Load<GameObject>("Structures/portal_01");
-			if(m_MainMenuPrefab == null)
-				m_MainMenuPrefab = Resources.Load<GameObject>("UI/main_menu");
 			if(m_LoadScreenPrefab == null)
 				m_LoadScreenPrefab = Resources.Load<GameObject>("UI/loading_screen");
 			if(m_GameCanvasPrefab == null)
@@ -83,8 +86,23 @@ public class GameManager : MonoBehaviour
 			throw new UnityException("Please make sure all GameManager fields are assigned!", exception);
 		}
 
+		// Set the difficulty factor
+		switch(PlayerPrefs.GetString(MainMenu.DIFF_KEY, "Medium"))
+		{
+			case "Easy":
+				m_DiffFactor = m_EasyDiffFactor;
+				break;
+			case "Medium":
+				m_DiffFactor = m_MediumDiffFactor;
+				break;
+			case "Hard":
+				m_DiffFactor = m_HardDiffFactor;
+				break;
+		}
+
 		// Set the initial state and start the FSM 
-		SetGameState(MainMenu());
+		Debug.Log("Current difficulty factor: " + m_DiffFactor);
+		SetGameState(LoadScreen());
 		StartCoroutine(FiniteStateMachine());
 	}
 
@@ -173,24 +191,9 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
-	IEnumerable MainMenu()
-	{
-		var menu = Instantiate(m_MainMenuPrefab) as GameObject;
-		var menuScript = menu.GetComponent<MainMenu>();
-
-		m_Player.SetActive(false);
-
-		foreach(var current in GameStates.MainMenu(menuScript))
-		{
-			yield return current;
-		}
-
-		Destroy(menu);
-		SetGameState(LoadScreen());
-	}
-
 	IEnumerable LoadScreen()
 	{
+		m_Player.SetActive(false);
 		var loadScreen = Instantiate(m_LoadScreenPrefab) as GameObject;
 		var loadScript = loadScreen.GetComponent<LoadingScreen>();
 
