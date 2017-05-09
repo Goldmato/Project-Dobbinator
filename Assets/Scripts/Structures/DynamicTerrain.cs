@@ -7,6 +7,7 @@ public class DynamicTerrain : MonoBehaviour
 {
 	// Public properties
 	public float TerrainHeightScale { get { return m_TerrainHeight; } }
+	public float TerrainMaxHeight { get { return m_MaxHeight * m_TerrainData.size.y; } }
 
 	// Private serialized fields
 	[SerializeField] private Transform m_DeathZone;

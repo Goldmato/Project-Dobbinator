@@ -15,7 +15,6 @@ public class PlatformGenerator : MonoBehaviour
 	[SerializeField] [Range(0.001f, 1.0f)] float m_SlopeTolerance;
 	[SerializeField] [Range(1, 100)]	   int   m_ScanSquareExtent;
 	[SerializeField] [Range(1, 99)]		   int   m_ScanSquareInnerExtent;
-	[SerializeField] [Range(1, 10)]		   int   m_SkyPlatformLayers;
 
 	[SerializeField] List<GameObject> m_GroundPlatforms;
 	[SerializeField] List<GameObject> m_SkyPlatforms;
@@ -26,9 +25,9 @@ public class PlatformGenerator : MonoBehaviour
 	DynamicTerrain m_DynamicTerrain;
 	TerrainData    m_TerrainData;
 
-	float m_TerrainMaxHeight;
 	float m_SkyLayerHeight;
 
+    int m_SkyPlatformLayers;
 	int m_GroundPlatformsSpawned;
 	int m_SkyPlatformsSpawned;
 	int m_SkyLayerIndex;
@@ -44,52 +43,56 @@ public class PlatformGenerator : MonoBehaviour
 	}
 
 	IEnumerator GenerateStuctures()
+    {
+        m_TerrainData = null;
+
+        // Wait for terrain to finish generating
+        while (m_TerrainData == null)
+        {
+            m_TerrainData = m_DynamicTerrain.GetTerrainData();
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // Find all points on the map which would be considered "hill peaks" by the algorithm
+        GameManager.Current.LoadState = "Calculating Hill Peaks";
+        GameManager.Current.LoadValue = 0.6f;
+        FindHillPeaks();
+        yield return new WaitForSeconds(DELAY);
+
+        // Instantiate a set number of platform layers, starting with the ground layer
+        GameManager.Current.LoadState = "Spawning Platform Layers [Ground]";
+        GameManager.Current.LoadValue = 0.7f;
+        SpawnGroundPlatformLayer();
+        yield return new WaitForSeconds(DELAY);
+
+        var baseLoadValue = GameManager.Current.LoadValue;
+        var col = GetComponent<Collider>();
+        CalculateSkyLayerHeights(col);
+
+        for (m_SkyLayerIndex = 0; m_SkyLayerIndex < m_SkyPlatformLayers; m_SkyLayerIndex++)
+        {
+            GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (m_SkyLayerIndex + 1) + "]";
+            GameManager.Current.LoadValue = baseLoadValue + ((1.0f / m_SkyPlatformLayers * m_SkyLayerIndex) * (1.0f - baseLoadValue));
+            SpawnSkyPlatformLayer();
+            yield return new WaitForSeconds(DELAY);
+        }
+
+        // Finish execution
+        GameManager.Current.LoadState = "Done";
+        GameManager.Current.LoadValue = 1.0f;
+
+        Debug.Log(m_GroundPlatformsSpawned + " Ground platforms spawned | " + m_SkyPlatformsSpawned + " Sky platforms spawned");
+    }
+
+    void CalculateSkyLayerHeights(Collider col)
+    {
+		m_SkyPlatformLayers = Mathf.CeilToInt((col.bounds.size.y - m_DynamicTerrain.TerrainMaxHeight - 
+											   m_SkyPlatformBaseHeightOffset) / m_SkyPlatformHeightInterval);
+		m_SkyLayerHeight = m_DynamicTerrain.TerrainMaxHeight + m_SkyPlatformBaseHeightOffset;
+    }
+
+    void FindHillPeaks()
 	{
-		m_TerrainData = null;
-		m_TerrainMaxHeight = 0;
-
-		// Wait for terrain to finish generating
-		while(m_TerrainData == null)
-		{
-			m_TerrainData = m_DynamicTerrain.GetTerrainData();
-			yield return new WaitForSeconds(0.1f);
-		}
-
-		// Find all points on the map which would be considered "hill peaks" by the algorithm
-		GameManager.Current.LoadState = "Calculating Hill Peaks";
-		GameManager.Current.LoadValue = 0.6f;
-		FindHillPeaks();
-		yield return new WaitForSeconds(DELAY);
-
-		// Instantiate a set number of platform layers, starting with the ground layer
-		GameManager.Current.LoadState = "Spawning Platform Layers [Ground]";
-		GameManager.Current.LoadValue = 0.7f;
-		SpawnGroundPlatformLayer();
-		yield return new WaitForSeconds(DELAY);
-
-		var baseLoadValue = GameManager.Current.LoadValue;
-		var col = GetComponent<Collider>();
-		m_SkyLayerHeight = (m_DynamicTerrain.TerrainHeightScale * col.bounds.size.y) + m_SkyPlatformBaseHeightOffset;
-		
-		for(m_SkyLayerIndex = 0; m_SkyLayerIndex < m_SkyPlatformLayers; m_SkyLayerIndex++)
-		{
-			GameManager.Current.LoadState = "Spawning Platform Layers [Sky " + (m_SkyLayerIndex + 1) + "]";
-			GameManager.Current.LoadValue = baseLoadValue + ((1.0f / m_SkyPlatformLayers * m_SkyLayerIndex) * (1.0f - baseLoadValue));
-			SpawnSkyPlatformLayer();
-			yield return new WaitForSeconds(DELAY);
-		}
-
-		// Finish execution
-		GameManager.Current.LoadState = "Done";
-		GameManager.Current.LoadValue = 1.0f;
-
-		Debug.Log(m_GroundPlatformsSpawned + " Ground platforms spawned | " + m_SkyPlatformsSpawned + " Sky platforms spawned");
-	}
-
-	void FindHillPeaks()
-	{
-		m_TerrainMaxHeight *= m_TerrainData.size.y;
-
 		if(m_ScanSquareInnerExtent > m_ScanSquareExtent)
 			throw new UnityException("Please make sure the ScanSquareInnerExtent field is a lower value " +
 								     "than SqanSquareExtent");
