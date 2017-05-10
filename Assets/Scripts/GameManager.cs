@@ -111,12 +111,15 @@ public class GameManager : MonoBehaviour
 
 	void Update() 
 	{
+#if UNITY_EDITOR
 		// DEBUGGING/TESTING
 		if(Input.GetKeyDown(KeyCode.Tab) &&
 		   m_PortalPlatform != null)
 		{
-			SetPlayerPosition(m_PortalPlatform.transform.position);
+			var pos = new Vector3(m_PortalPlatform.transform.position.x, m_PortalPlatform.transform.position.y + 10, m_PortalPlatform.transform.position.z);
+			SetPlayerPosition(pos);
 		}
+#endif
 	}
 
 	// Use this method instead of setting the state directly
