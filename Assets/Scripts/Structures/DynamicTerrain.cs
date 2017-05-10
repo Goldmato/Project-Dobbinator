@@ -23,7 +23,7 @@ public class DynamicTerrain : MonoBehaviour
 	bool  m_TerrainFinishedGenerating = false;
 
 	// Constants
-	const float DELAY = 0.25f;
+	const float DELAY = 0.1f;
 	const string WALL_TOP_NAME = "wall_top";
 	const string WALL_BOTTOM_NAME = "wall_bottom";
 	const string WALL_RIGHT_NAME = "wall_right";

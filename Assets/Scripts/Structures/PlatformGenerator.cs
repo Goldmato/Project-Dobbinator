@@ -32,7 +32,7 @@ public class PlatformGenerator : MonoBehaviour
 	int m_SkyPlatformsSpawned;
 	int m_SkyLayerIndex;
 
-	const float DELAY = 0.25f;
+	const float DELAY = 0.1f;
 
 	void Start()
 	{
