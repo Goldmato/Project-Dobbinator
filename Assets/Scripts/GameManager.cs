@@ -109,6 +109,16 @@ public class GameManager : MonoBehaviour
 		StartCoroutine(FiniteStateMachine());
 	}
 
+	void Update() 
+	{
+		// DEBUGGING/TESTING
+		if(Input.GetKeyDown(KeyCode.Tab) &&
+		   m_PortalPlatform != null)
+		{
+			SetPlayerPosition(m_PortalPlatform.transform.position);
+		}
+	}
+
 	// Use this method instead of setting the state directly
 	void SetGameState(IEnumerable state)
 	{
@@ -212,8 +222,11 @@ public class GameManager : MonoBehaviour
 			if(m_PortalPlatform != null) 
 			{
 				// Set the new arena's position to be on the opposite side of the previous portal
-				arenaSpawnPos.x = m_PortalPlatform.transform.position.x > prevArenaSize.x / 2 ? prevArenaPos.x : prevArenaSize.x;
-				arenaSpawnPos.z = m_PortalPlatform.transform.position.z > prevArenaSize.z / 2 ? prevArenaPos.z : prevArenaSize.z;
+				// arenaSpawnPos.x = m_PortalPlatform.transform.position.x > prevArenaSize.x / 2 ? prevArenaPos.x : prevArenaSize.x;
+				// arenaSpawnPos.z = m_PortalPlatform.transform.position.z > prevArenaSize.z / 2 ? prevArenaPos.z : prevArenaSize.z;
+
+				arenaSpawnPos.z += prevArenaSize.z;
+				arenaSpawnPos.x += Random.value > 0.5f ? prevArenaSize.x : -prevArenaSize.x;
 
 				// Remove the portal platform reference so another portal can be spawned
 				m_PortalPlatform = null;
