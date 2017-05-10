@@ -188,12 +188,6 @@ public class PlatformGenerator : MonoBehaviour
 					var platform = Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], 
 											   new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity) as GameObject;
 					platform.transform.SetParent(skyPlatformContainer.transform);
-					
-					if(m_SkyLayerIndex == m_SkyPlatformLayers - 1 &&
-					   GameManager.Current.PortalPlatform == null)
-					{
-						GameManager.Current.PortalPlatform = platform;
-					}
 
 					spawnChance = m_SkyPlatformSpawnChance;
 					m_SkyPlatformsSpawned++;
@@ -205,7 +199,21 @@ public class PlatformGenerator : MonoBehaviour
 			}
 		}
 
+		// If this is the last layer, find a random platform to set as
+		// the portal platform base
+		if(m_SkyLayerIndex + 1 == m_SkyPlatformLayers &&
+		   GameManager.Current.PortalPlatform == null)
+		{
+			SetRandomPortalPlatform(skyPlatformContainer);
+		}
+
 		m_SkyLayerHeight += m_SkyPlatformHeightInterval;
+	}
+
+	void SetRandomPortalPlatform(GameObject parentContainer)
+	{
+		int randPlat = Random.Range(0, parentContainer.transform.childCount);
+		GameManager.Current.PortalPlatform = parentContainer.transform.GetChild(randPlat).gameObject;
 	}
 
 	#region DEPRECATED
@@ -273,7 +281,8 @@ public class PlatformGenerator : MonoBehaviour
 
 	//	Debug.Log(removedPlatforms + " Platforms removed! " + (m_HillPeaks.Count - removedPlatforms) + " Platforms remaining.");
 	//}
-#endregion
+
+	#endregion
 
 }
 			
