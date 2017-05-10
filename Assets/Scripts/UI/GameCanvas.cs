@@ -15,8 +15,10 @@ public class GameCanvas : MonoBehaviour
 	[SerializeField] private Slider   m_StreakBar;
 
 	// Private fields
-	float m_SliderHeight;
-	int   m_OldStreak;
+	string m_Minutes;
+	string m_Seconds;
+	float  m_SliderHeight;
+	int    m_OldStreak;
 
 	// Constants
 	const float  STREAK_SUB_VALUE = 0.005f;
@@ -70,10 +72,17 @@ public class GameCanvas : MonoBehaviour
 	void UpdateTimerText(int seconds)
 	{
 		System.TimeSpan ts = System.TimeSpan.FromSeconds(seconds);
+		m_Seconds = ts.Seconds.ToString();
+
+		if(ts.Seconds < 10)
+			m_Seconds = "0" + m_Seconds;
 
 		if(ts.Minutes == 0)
-			m_TimerText.text = ts.Seconds.ToString();
+			m_TimerText.text = m_Seconds;
 		else
-			m_TimerText.text = string.Format("{0}:{1}", ts.Minutes, ts.Seconds);
+		{
+			m_Minutes = ts.Minutes.ToString();
+			m_TimerText.text = string.Format("{0}:{1}", m_Minutes, m_Seconds);
+		}
 	}
 }
