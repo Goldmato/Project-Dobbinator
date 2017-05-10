@@ -13,7 +13,6 @@ public class FirstPersonController : MonoBehaviour
 
 	// Private serialized fields
 	[SerializeField] private PlayerStats m_PlayerStats;
-	[SerializeField] [Range(0.001f, 10f)] private float m_GameOverDelay = 0.5f;
 	[SerializeField] private bool m_IsWalking;
     [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
 	[SerializeField] [Range(0f, JUMP_MAX_ACCEL)] private float m_FlyAcceleration;
