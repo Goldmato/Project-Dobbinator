@@ -199,6 +199,8 @@ public class GameManager : MonoBehaviour
 		var loadScreen = Instantiate(m_LoadScreenPrefab) as GameObject;
 		var loadScript = loadScreen.GetComponent<LoadingScreen>();
 
+		// Set the inital position of the arena to the world origin, 
+		// and offset it by the previous arena (if there is one)
 		var arenaSpawnPos = Vector3.zero;
 		if(m_ArenaIndex > 0)
 		{
@@ -207,10 +209,15 @@ public class GameManager : MonoBehaviour
 
 			arenaSpawnPos = prevArenaPos;
 
-			if(Random.value > 0.5f)
-				arenaSpawnPos.z += prevArenaSize.z;
-			else
-				arenaSpawnPos.x += prevArenaSize.x;
+			if(m_PortalPlatform != null) 
+			{
+				// Set the new arena's position to be on the opposite side of the previous portal
+				arenaSpawnPos.x = m_PortalPlatform.transform.position.x > prevArenaSize.x / 2 ? prevArenaPos.x : prevArenaSize.x;
+				arenaSpawnPos.z = m_PortalPlatform.transform.position.z > prevArenaSize.z / 2 ? prevArenaPos.z : prevArenaSize.z;
+
+				// Remove the portal platform reference so another portal can be spawned
+				m_PortalPlatform = null;
+			}
 		}
 
 		m_Arena.Add(Instantiate(m_ArenaPrefab, arenaSpawnPos, Quaternion.identity) as GameObject);
@@ -235,20 +242,20 @@ public class GameManager : MonoBehaviour
 		}
 
 		// Spawn a single portal at the platform set by PlatformGenerator
-		if(PortalPlatform != null)
+		if(m_PortalPlatform != null)
 		{
 			// Remove the platform script from the portal platform
-			Destroy(PortalPlatform.GetComponent<Platform>());
+			Destroy(m_PortalPlatform.GetComponent<Platform>());
 
-			m_CurrentPortal = Instantiate(m_PortalPrefab, PortalPlatform.transform.position,
-										  PortalPlatform.transform.rotation).GetComponent<Portal>();
+			m_CurrentPortal = Instantiate(m_PortalPrefab, m_PortalPlatform.transform.position,
+										  m_PortalPlatform.transform.rotation).GetComponent<Portal>();
 			
 			// Move the portal above the platform based on its height
 			m_CurrentPortal.transform.Translate(new Vector3(0, m_CurrentPortal.GetComponent<Collider>().bounds.size.y, 0));
 
 			m_CurrentPortal.OnPortalActivated += () => { GameStates.Running = false; };
 			
-			Debug.Log("Portal spawned at:" + PortalPlatform.transform.position);
+			Debug.Log("Portal spawned at:" + m_PortalPlatform.transform.position);
 		}
 
 		SetGameState(MainGame());
@@ -263,12 +270,6 @@ public class GameManager : MonoBehaviour
 		foreach(var current in GameStates.MainGame(m_ArenaTimer, 50, 25))
 		{
 			yield return current;
-		}
-
-		// If there's a portal, remove the public gameObject reference
-		if(m_CurrentPortal != null) 
-		{
-			m_PortalPlatform = null;
 		}
 
 		Destroy(canvas);
