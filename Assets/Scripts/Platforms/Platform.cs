@@ -18,6 +18,8 @@ public class Platform : MonoBehaviour
 	protected AudioSource  m_AudioSource;
 	protected Renderer[]   m_Renderer;
 
+	protected bool m_ApplyForceFlag;
+
 	static bool m_NullExceptionFlag;
 
 	protected virtual void Start()
@@ -48,7 +50,19 @@ public class Platform : MonoBehaviour
 
 	public virtual void PlayerBoost(FirstPersonController character)
 	{
-		if(character.ApplyForce(transform.up * m_ForceFactor))
+		// Reset player stats if this platform is a sky platform
+		if(m_PlatformType == PlatformType.Sky)
+		{
+			GameStates.ScoreBreakpoints = false;
+			GameManager.Current.ResetStreak(callEvent: true, resetStreak: false);
+		}
+		else
+		{
+			GameStates.ScoreBreakpoints = true;
+		}
+
+		m_ApplyForceFlag = character.ApplyForce(transform.up * m_ForceFactor);
+		if(m_ApplyForceFlag)
 		{
 			var platformID = gameObject.GetInstanceID();
 			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType, platformID);

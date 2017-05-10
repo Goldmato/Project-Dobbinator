@@ -99,7 +99,7 @@ public class FirstPersonController : MonoBehaviour
 				if(!m_GroundedTrigger)
 				{
 					m_GroundedTrigger = true;
-					GameManager.Current.ResetStreak(CallEvent: true);
+					GameManager.Current.ResetStreak(callEvent: true);
 				}
 			}
 			if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)

@@ -61,15 +61,12 @@ public class SpringPlatform : Platform
 		// If ApplyForce isn't on cooldown, play the main audio clip and 
 		// apply a "spring" effect to the platform and disable the collider
 		// and shadow rendering
-		if(character.ApplyForce(transform.up * m_ForceFactor))
+		base.PlayerBoost(character);
+		if(m_ApplyForceFlag)
 		{
 			if(m_MovePlatform <= DISABLED)
 				StartSpringEffect();
 			StartCoroutine(DisablePlatform());
-			var platformID = gameObject.GetInstanceID();
-			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType, platformID);
-			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
-			m_AudioSource.Play();
 		}
 	}
 

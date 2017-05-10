@@ -127,19 +127,6 @@ public class GameManager : MonoBehaviour
 			return;
 		m_LastPlatformID = platformID;
 
-		// Enable/Disable score breakpoint events based on platform type
-		switch(platType)
-		{
-			case PlatformType.Ground:
-				GameStates.ScoreBreakpoints = true;
-				break;
-			case PlatformType.Sky:
-				GameStates.ScoreBreakpoints = false;
-				if(OnResetStreak != null)
-					OnResetStreak();
-				break;
-		}
-
 		m_CurrentStreak++;
 		m_StreakBonus = m_CurrentStreak * STREAK_BONUS;
 		if(m_GameCanvas != null)
@@ -152,11 +139,12 @@ public class GameManager : MonoBehaviour
 		m_CurrentScore += Mathf.RoundToInt(score + m_StreakBonus);
 	}
 
-	public void ResetStreak(bool CallEvent = false)
+	public void ResetStreak(bool callEvent = false, bool resetStreak = true)
 	{
-		if(CallEvent && OnResetStreak != null)
+		if(callEvent && OnResetStreak != null)
 			OnResetStreak();
-		m_CurrentStreak = 0;
+		if(resetStreak)
+			m_CurrentStreak = 0;
 	}
 
 	public void EndGame() 
