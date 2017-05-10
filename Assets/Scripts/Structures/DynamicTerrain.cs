@@ -125,10 +125,8 @@ public class DynamicTerrain : MonoBehaviour
 
 		// Scale the deathzone height to the border height
 		m_DeathZone.localScale = new Vector3(m_DeathZone.localScale.x,
-											(m_TerrainData.size.y / m_TerrainBorderHeight) - 1,
+											(m_TerrainBorderHeight / 2) - 1,
 											 m_DeathZone.localScale.z);
-		m_DeathZone.position = new Vector3(m_DeathZone.position.x, m_DeathZone.localScale.y / 2, 
-										   m_DeathZone.position.z);
 	}
 
 	void BuildSplats()

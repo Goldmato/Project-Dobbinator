@@ -1,5 +1,3 @@
-using System.Collections;
-
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
@@ -288,7 +286,8 @@ public class FirstPersonController : MonoBehaviour
 		if(!m_GameOverFlag && other.gameObject.CompareTag("DeathZone"))
 		{
 			m_GameOverFlag = true;
-			StartCoroutine("GameOver");
+			other.collider.isTrigger = true;
+			GameManager.Current.EndGame();
 		}
 
 		var platform = other.gameObject.GetComponentInParent<Platform>();
@@ -325,11 +324,5 @@ public class FirstPersonController : MonoBehaviour
 		m_ForceTimer = Time.timeSinceLevelLoad + m_ForceCooldown;
 		m_MoveDir = force * m_PlayerStats.forceMultiplier;
 		return true;
-	}
-
-	private IEnumerator GameOver()
-	{
-		yield return new WaitForSeconds(m_GameOverDelay);
-		GameManager.Current.EndGame();
 	}
 }

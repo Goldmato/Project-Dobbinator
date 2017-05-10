@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField] [Range(1, 5)] private float m_EasyDiffFactor = 1f;
 	[SerializeField] [Range(1, 5)] private float m_MediumDiffFactor = 2.5f;
 	[SerializeField] [Range(1, 5)] private float m_HardDiffFactor = 5f;
+	[SerializeField] [Range(1, 5)] private float m_GameOverDelay = 0.5f;
 
 	[SerializeField] private GameObject m_LoadScreenPrefab;
 	[SerializeField] private GameObject m_GameCanvasPrefab;
@@ -149,12 +150,18 @@ public class GameManager : MonoBehaviour
 
 	public void EndGame() 
 	{
-		UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
+		StartCoroutine(GameOver());
 	}
 
 	public void ExitGame()
 	{
 		Application.Quit();
+	}
+
+	IEnumerator GameOver()
+	{
+		yield return new WaitForSeconds(m_GameOverDelay);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(GAME_OVER_SCENE);
 	}
 
 	IEnumerator IncrementScoreText(int oldScore)
