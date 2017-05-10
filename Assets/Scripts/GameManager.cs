@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
 	int    m_CurrentScore;
 	int    m_MinScore = 10000;
 	int    m_ArenaIndex;
+	int    m_LastPlatformID;
 	bool   m_TextIncrementing;
 
 	// Delegates and events
@@ -119,8 +120,13 @@ public class GameManager : MonoBehaviour
 	}
 
 	// Add score and multiply it by a streak bonus
-	public void AddScore(int score, PlatformType platType)
+	public void AddScore(int score, PlatformType platType, int platformID)
 	{
+		// First check if the player is jumping on the same platform
+		if(platformID == m_LastPlatformID) 
+			return;
+		m_LastPlatformID = platformID;
+
 		// Enable/Disable score breakpoint events based on platform type
 		switch(platType)
 		{

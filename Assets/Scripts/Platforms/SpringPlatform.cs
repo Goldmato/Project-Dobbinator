@@ -66,7 +66,8 @@ public class SpringPlatform : Platform
 			if(m_MovePlatform <= DISABLED)
 				StartSpringEffect();
 			StartCoroutine(DisablePlatform());
-			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType);
+			var platformID = gameObject.GetInstanceID();
+			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType, platformID);
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
 		}

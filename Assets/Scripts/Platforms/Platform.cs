@@ -50,7 +50,8 @@ public class Platform : MonoBehaviour
 	{
 		if(character.ApplyForce(transform.up * m_ForceFactor))
 		{
-			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType);
+			var platformID = gameObject.GetInstanceID();
+			GameManager.Current.AddScore(m_ScoreValue, m_PlatformType, platformID);
 			m_AudioSource.pitch = Random.Range(m_SoundPitchLow, m_SoundPitchHigh);
 			m_AudioSource.Play();
 		}
