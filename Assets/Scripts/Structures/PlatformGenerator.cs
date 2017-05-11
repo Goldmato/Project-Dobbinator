@@ -149,6 +149,9 @@ public class PlatformGenerator : MonoBehaviour
 								   Quaternion.Euler(0, Random.Range(0, 360), 0)) as GameObject;
 			newPlatform.transform.SetParent(groundPlatformContainer.transform);
 
+			// Change the platform scale depending on the difficulty
+			newPlatform.transform.localScale = new Vector3 (newPlatform.transform.localScale.x / GameManager.DifficultyFactor, newPlatform.transform.localScale.y, newPlatform.transform.localScale.z / GameManager.DifficultyFactor);
+
 			// Set the start platform if null
 			if(GameManager.Current.StartPlatform == null)
 				GameManager.Current.StartPlatform = newPlatform;

@@ -16,16 +16,16 @@ public class GameManager : MonoBehaviour
 
 	public string LoadState { get { return m_LoadState; } set { m_LoadState = value; } }
 	public float  LoadValue { get { return m_LoadValue; } set { m_LoadValue = value; } }
-	public float  DifficultyFactor { get { return m_DiffFactor; } }
+	public static float  DifficultyFactor { get { return m_DiffFactor; } }
 	public int Score { get { return m_CurrentScore; } }
 	public int Streak { get { return m_CurrentStreak; } }
 
 	// Private serialized fields
 	[SerializeField] [Range(1, 1000)] private int m_ArenaTimer = 300;
 
-	[SerializeField] [Range(1, 5)] private float m_EasyDiffFactor = 1f;
-	[SerializeField] [Range(1, 5)] private float m_MediumDiffFactor = 2.5f;
-	[SerializeField] [Range(1, 5)] private float m_HardDiffFactor = 5f;
+	[SerializeField] [Range(0.1f, 5)] private float m_EasyDiffFactor = 0.5f;
+	[SerializeField] [Range(0.1f, 5)] private float m_MediumDiffFactor = 1f;
+	[SerializeField] [Range(0.1f, 5)] private float m_HardDiffFactor = 1.5f;
 	[SerializeField] [Range(1, 5)] private float m_GameOverDelay = 0.5f;
 
 	[SerializeField] private GameObject m_LoadScreenPrefab;
@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
 
 	string m_LoadState;
 	float  m_LoadValue;
-	float  m_DiffFactor;
+	static float  m_DiffFactor;
 	float  m_StreakBonus;
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
