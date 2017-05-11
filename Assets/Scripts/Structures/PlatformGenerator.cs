@@ -19,17 +19,22 @@ public class PlatformGenerator : MonoBehaviour
 	[SerializeField] List<GameObject> m_GroundPlatforms;
 	[SerializeField] List<GameObject> m_SkyPlatforms;
 
+	[SerializeField] List<float> m_GroundSpawnChances;
+	[SerializeField] List<float> m_SkySpawnChances;
+
 	IEnumerable m_CurrentState;
 
 	List<Vector3>  m_HillPeaks = new List<Vector3>();
+
 	DynamicTerrain m_DynamicTerrain;
 	TerrainData    m_TerrainData;
 
+	string m_PlatformStatistics;
+
 	float m_SkyLayerHeight;
 
+	int[] m_PlatformsSpawned;
     int m_SkyPlatformLayers;
-	int m_GroundPlatformsSpawned;
-	int m_SkyPlatformsSpawned;
 	int m_SkyLayerIndex;
 
 	const float DELAY = 0.1f;
@@ -81,7 +86,8 @@ public class PlatformGenerator : MonoBehaviour
         GameManager.Current.LoadState = "Done";
         GameManager.Current.LoadValue = 1.0f;
 
-        Debug.Log(m_GroundPlatformsSpawned + " Ground platforms spawned | " + m_SkyPlatformsSpawned + " Sky platforms spawned");
+		Debug.Log("PLATFORM STATISTICS \n" +
+				  "------------------- \n" + m_PlatformStatistics);
     }
 
     void CalculateSkyLayerHeights(Collider col)
@@ -136,21 +142,32 @@ public class PlatformGenerator : MonoBehaviour
 		var groundPlatformContainer = new GameObject("ground_platforms");
 		groundPlatformContainer.transform.position = Vector3.zero;
 
+		m_PlatformsSpawned = new int[m_GroundPlatforms.Count];
+
 		// Create a random Platform at each hill point
 		foreach (Vector3 pos in m_HillPeaks)
 		{
-			float x = pos.x / m_TerrainData.heightmapWidth;
+			GameObject platformToSpawn = null;
+
+			// Hopefully this doesn't cause any crashes...
+			while(platformToSpawn == null)
+            {
+                platformToSpawn = FindRandomPlatform(m_GroundPlatforms, m_GroundSpawnChances);
+            }
+
+            float x = pos.x / m_TerrainData.heightmapWidth;
 			float y = pos.z / m_TerrainData.heightmapHeight;
 
 			Vector3 peakPos = new Vector3(x * m_TerrainData.size.x + transform.position.x, pos.y + transform.position.y,
 										  y * m_TerrainData.size.z + transform.position.z);
 			// Debug.Log(string.Format("X Rotation: {0}, Z Rotation: {1}", rotX, rotZ));
-			GameObject newPlatform = Instantiate(m_GroundPlatforms[Random.Range(0, m_GroundPlatforms.Count)], peakPos,
+			GameObject newPlatform = Instantiate(platformToSpawn, peakPos,
 								   Quaternion.Euler(0, Random.Range(0, 360), 0)) as GameObject;
 			newPlatform.transform.SetParent(groundPlatformContainer.transform);
 
 			// Change the platform scale depending on the difficulty
-			newPlatform.transform.localScale = new Vector3 (newPlatform.transform.localScale.x / GameManager.DifficultyFactor, newPlatform.transform.localScale.y, newPlatform.transform.localScale.z / GameManager.DifficultyFactor);
+			newPlatform.transform.localScale = new Vector3 (newPlatform.transform.localScale.x / GameManager.DifficultyFactor, 
+															newPlatform.transform.localScale.y, newPlatform.transform.localScale.z / GameManager.DifficultyFactor);
 
 			// Set the start platform if null
 			if(GameManager.Current.StartPlatform == null)
@@ -165,12 +182,12 @@ public class PlatformGenerator : MonoBehaviour
 			{
 				newPlatform.transform.up = hitInfo.normal;
 			}
-
-			m_GroundPlatformsSpawned++;
 		}
+
+		RecordPlatformStatistics("GROUND LAYER STATISTICS \n");
 	}
 
-	void SpawnSkyPlatformLayer()
+    void SpawnSkyPlatformLayer()
 	{
 		var skyPlatformContainer = new GameObject("sky_platforms [" + (m_SkyLayerIndex + 1) + "]");
 		skyPlatformContainer.transform.position = new Vector3(0, m_SkyLayerHeight, 0);
@@ -178,22 +195,31 @@ public class PlatformGenerator : MonoBehaviour
 		float spawnChance = m_SkyPlatformSpawnChance;
 		int scanEmptySpace = m_ScanSquareInnerExtent * 2 + 1;
 
+		m_PlatformsSpawned = new int[m_SkyPlatforms.Count];
+
 		for(int x = (int)transform.position.x; x < m_TerrainData.size.x + transform.position.x; x += m_ScanSquareExtent)
 		{
 			for(int z = (int)transform.position.z; z < m_TerrainData.size.z + transform.position.z; z += m_ScanSquareExtent)
 			{
 				if(Random.Range(0f, 100f) <= spawnChance)
 				{
+					GameObject platformToSpawn = null;
+
+					// Hopefully this doesn't cause any crashes...
+					while(platformToSpawn == null)
+					{
+						platformToSpawn = FindRandomPlatform(m_SkyPlatforms, m_SkySpawnChances);
+					}
+
 					// Find a random spot within the inner scan sqare extent range
 					int randX = Random.Range(x + scanEmptySpace, (x + m_ScanSquareExtent) - scanEmptySpace);
 					int randZ = Random.Range(z + scanEmptySpace, (z + m_ScanSquareExtent) - scanEmptySpace);
 
-					var platform = Instantiate(m_SkyPlatforms[Random.Range(0, m_SkyPlatforms.Count)], 
-											   new Vector3(randX, m_SkyLayerHeight, randZ), Quaternion.identity) as GameObject;
+					var platform = Instantiate(platformToSpawn, new Vector3(randX, m_SkyLayerHeight, randZ), 
+											   Quaternion.identity) as GameObject;
 					platform.transform.SetParent(skyPlatformContainer.transform);
 
 					spawnChance = m_SkyPlatformSpawnChance;
-					m_SkyPlatformsSpawned++;
 				}
 				else
 				{
@@ -211,6 +237,37 @@ public class PlatformGenerator : MonoBehaviour
 		}
 
 		m_SkyLayerHeight += m_SkyPlatformHeightInterval;
+
+		RecordPlatformStatistics("SKY LAYER[" + (m_SkyLayerIndex + 1) + "] STATISTICS \n");
+	}
+
+	GameObject FindRandomPlatform(List<GameObject> platList, List<float> spawnChanceList)
+    {
+        for (int i = 0; i < platList.Count; i++)
+        {
+            if (spawnChanceList[i] == 0)
+                spawnChanceList[i] = 0.5f;
+            if (Random.value <= spawnChanceList[i])
+            {
+				m_PlatformsSpawned[i]++;
+				if(platList[i] != null)
+            		return platList[i];
+				else
+                	throw new UnityException("No platform assigned to Ground Platform spawn chance [" + i + "]");
+            }
+        }
+
+		return null;
+    }
+
+	void RecordPlatformStatistics(string info)
+	{
+		m_PlatformStatistics += info;
+
+		for(int i = 0; i < m_PlatformsSpawned.Length; i++)
+		{
+			m_PlatformStatistics += "Instances of platform[" + i + "] : " + m_PlatformsSpawned[i] + "\n";
+		}
 	}
 
 	void SetRandomPortalPlatform(GameObject parentContainer)
