@@ -52,6 +52,8 @@ public class GameManager : MonoBehaviour
 	int    m_LastPlatformID;
 	bool   m_TextIncrementing;
 
+	static bool m_ExceptionFlag;
+
 	// Delegates and events
 	public delegate void DefaultEventHandler();
 	public static event DefaultEventHandler OnResetStreak;
@@ -60,11 +62,32 @@ public class GameManager : MonoBehaviour
 	const string GAME_OVER_SCENE = "GameOver";
 	const string TEXT_GROW = "grow_text";
 	const float  STREAK_BONUS = 2.5f;
+
+	void Awake() 
+	{
+		if(m_Instance == null) 
+		{
+			m_Instance = this;
+		}
+		else if(!m_ExceptionFlag)
+		{
+			m_ExceptionFlag = true;
+
+			Debug.Break();
+			string activeGameManagers = "List of active objects with a GameManager in scene\n" +
+										"------------------------------------\n";
+			foreach(GameManager gm in FindObjectsOfType(typeof(GameManager)))
+			{
+				activeGameManagers += "[" + gm.gameObject.name + "]\n";
+			}
+
+			Debug.LogError(activeGameManagers);
+			throw new UnityException("Please ensure there is only one GameManager in the scene!");
+		}
+	}
 	
 	void Start()
 	{
-		m_Instance = this;
-
 		try
 		{
 			// Find player via tag 
@@ -84,9 +107,9 @@ public class GameManager : MonoBehaviour
 			if(m_GameCanvasPrefab == null)
 				m_GameCanvasPrefab = Resources.Load<GameObject>("UI/game_canvas");
 		}
-		catch(System.NullReferenceException exception)
+		catch
 		{
-			throw new UnityException("Please make sure all GameManager fields are assigned!", exception);
+			throw new UnityException("Please make sure all GameManager fields are assigned!");
 		}
 
 		// Set the difficulty factor
