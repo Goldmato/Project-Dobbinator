@@ -139,7 +139,8 @@ public class GameManager : MonoBehaviour
 		if(Input.GetKeyDown(KeyCode.Tab) &&
 		   m_PortalPlatform != null)
 		{
-			var pos = new Vector3(m_PortalPlatform.transform.position.x, m_PortalPlatform.transform.position.y + 10, m_PortalPlatform.transform.position.z);
+			var pos = new Vector3(m_PortalPlatform.transform.position.x, m_PortalPlatform.transform.position.y + 10,
+							      m_PortalPlatform.transform.position.z);
 			SetPlayerPosition(pos);
 		}
 #endif
