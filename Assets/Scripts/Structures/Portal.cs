@@ -12,9 +12,9 @@ public class Portal : MonoBehaviour
 
 	void OnTriggerEnter(Collider other) 
 	{
-		if(!m_PortalActivated && other.CompareTag("Player"))
+		if(!m_PortalActivated)
 		{
-			if(OnPortalActivated != null) 
+			if(OnPortalActivated != null  && other.CompareTag("Player")) 
 			{
 				OnPortalActivated();
 				m_PortalActivated = true;
