@@ -166,8 +166,9 @@ public class PlatformGenerator : MonoBehaviour
 			newPlatform.transform.SetParent(groundPlatformContainer.transform);
 
 			// Change the platform scale depending on the difficulty
-			newPlatform.transform.localScale = new Vector3 (newPlatform.transform.localScale.x / GameManager.DifficultyFactor, 
-															newPlatform.transform.localScale.y, newPlatform.transform.localScale.z / GameManager.DifficultyFactor);
+			newPlatform.transform.localScale = new Vector3 (newPlatform.transform.localScale.x / GameManager.Current.DifficultyFactor, 
+															newPlatform.transform.localScale.y, 
+															newPlatform.transform.localScale.z / GameManager.Current.DifficultyFactor);
 
 			// Set the start platform if null
 			if(GameManager.Current.StartPlatform == null)

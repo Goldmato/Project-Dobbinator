@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
 
 	public string LoadState { get { return m_LoadState; } set { m_LoadState = value; } }
 	public float  LoadValue { get { return m_LoadValue; } set { m_LoadValue = value; } }
-	public static float  DifficultyFactor { get { return m_DiffFactor; } }
+	public float  DifficultyFactor { get { return m_DiffFactor; } }
 	public int Score { get { return m_CurrentScore; } }
 	public int Streak { get { return m_CurrentStreak; } }
 
@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
 
 	string m_LoadState;
 	float  m_LoadValue;
-	static float  m_DiffFactor;
+	float  m_DiffFactor;
 	float  m_StreakBonus;
 	int    m_CurrentStreak;
 	int    m_CurrentScore;
