@@ -289,6 +289,7 @@ public class GameManager : MonoBehaviour
 
 			m_CurrentPortal = Instantiate(m_PortalPrefab, m_PortalPlatform.transform.position,
 										  m_PortalPlatform.transform.rotation).GetComponent<Portal>();
+			m_CurrentPortal.transform.SetParent(m_PortalPlatform.transform);
 			
 			// Move the portal above the platform based on its height
 			m_CurrentPortal.transform.Translate(new Vector3(0, m_CurrentPortal.GetComponent<Collider>().bounds.size.y, 0));
