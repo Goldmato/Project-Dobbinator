@@ -132,9 +132,9 @@ public class GameManager : MonoBehaviour
 		StartCoroutine(FiniteStateMachine());
 	}
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 	void Update() 
 	{
-#if UNITY_EDITOR
 		// DEBUGGING/TESTING
 		if(Input.GetKeyDown(KeyCode.Tab) &&
 		   m_PortalPlatform != null)
@@ -143,8 +143,19 @@ public class GameManager : MonoBehaviour
 							      m_PortalPlatform.transform.position.z);
 			SetPlayerPosition(pos);
 		}
-#endif
+		if(Input.GetKeyDown(KeyCode.Backspace) && m_CurrentPortal != null)
+		{
+			m_CurrentPortal.TogglePortal();
+		}
 	}
+
+	void OnGUI()
+	{
+		if(m_CurrentPortal != null)
+			UnityEngine.GUI.Label(new Rect((Screen.width / 2) - 100, Screen.height - 50, 200, 50),
+				"Portal active: " + m_CurrentPortal.Active);
+	}
+#endif
 
 	// Use this method instead of setting the state directly
 	void SetGameState(IEnumerable state)
