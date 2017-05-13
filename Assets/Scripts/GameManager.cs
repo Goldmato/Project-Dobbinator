@@ -286,6 +286,8 @@ public class GameManager : MonoBehaviour
 		{
 			// Remove the platform script from the portal platform
 			Destroy(m_PortalPlatform.GetComponent<Platform>());
+			if(m_PortalPlatform.GetComponent<Rigidbody>() != null)
+				m_PortalPlatform.GetComponent<Rigidbody>().isKinematic = true;
 
 			m_CurrentPortal = Instantiate(m_PortalPrefab, m_PortalPlatform.transform.position,
 										  m_PortalPlatform.transform.rotation).GetComponent<Portal>();
