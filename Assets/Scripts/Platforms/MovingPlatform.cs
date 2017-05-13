@@ -6,7 +6,9 @@ using UnityEngine;
 public class MovingPlatform : Platform
 {
 	// Fields and properties
-	[SerializeField] [Range(0.01f, 100f)] float m_MoveRange = 50f;
+	public static int MoveRange { get { return m_MoveRange * 2; } }
+
+	[SerializeField] [Range(0, 100)] static int m_MoveRange = 50;
 	[SerializeField] [Range(0.01f, MAX_SPEED)] float m_MoveSpeedLow = MAX_SPEED / 2;
 	[SerializeField] [Range(0.01f, MAX_SPEED)] float m_MoveSpeedHigh = MAX_SPEED;
 
@@ -19,8 +21,10 @@ public class MovingPlatform : Platform
 
 	float m_MoveSpeed;
 	bool  m_Direction;
+	bool  m_RecalculatePath;
 
 	const float MAX_SPEED = 10f;
+	const string ARENA_WALL = "ArenaWall";
 
 	protected override void Start()
 	{
@@ -36,12 +40,18 @@ public class MovingPlatform : Platform
 
 	void FixedUpdate()
 	{
-		if(Vector3.Distance(transform.position, m_TargetPos) < 0.1f)
+		if(m_RecalculatePath || Vector3.Distance(transform.position, m_TargetPos) < 0.1f)
 		{
+			m_RecalculatePath = false;
 			m_Direction = !m_Direction;
 			m_TargetPos = m_Direction ? m_ExtentPos : m_OriginalPos;
 			m_RigidBody.velocity = (transform.position - m_TargetPos).normalized * m_MoveSpeed;
 		}
 	}
 
+	void OnCollisionEnter(Collision other)
+	{
+		if(other.gameObject.CompareTag(ARENA_WALL))
+			m_RecalculatePath = true;
+	}
 }

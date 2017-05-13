@@ -11,6 +11,7 @@ public class PlatformGenerator : MonoBehaviour
 	[SerializeField] [Range(0.001f, 1000f)] float m_SkyPlatformHeightInterval;
 	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnChance;
 	[SerializeField] [Range(0.001f, 100f)] float m_SkyPlatformSpawnEntropy;
+	[SerializeField] [Range(0.001f, 10f)]  float m_SkyPlatformHeightVariance;
 	[SerializeField] [Range(0.001f, 1.0f)] float m_HeightTolerance;
 	[SerializeField] [Range(0.001f, 1.0f)] float m_SlopeTolerance;
 	[SerializeField] [Range(1, 100)]	   int   m_ScanSquareExtent;
@@ -198,10 +199,16 @@ public class PlatformGenerator : MonoBehaviour
 
 		m_PlatformsSpawned = new int[m_SkyPlatforms.Count];
 
-		for(int x = (int)transform.position.x; x < m_TerrainData.size.x + transform.position.x; x += m_ScanSquareExtent)
+		for(int x = ((int)transform.position.x + MovingPlatform.MoveRange); 
+				x < (m_TerrainData.size.x + transform.position.x) - MovingPlatform.MoveRange; x += m_ScanSquareExtent)
 		{
-			for(int z = (int)transform.position.z; z < m_TerrainData.size.z + transform.position.z; z += m_ScanSquareExtent)
+			if(x + m_ScanSquareExtent > (m_TerrainData.size.x + transform.position.x) - MovingPlatform.MoveRange)
+				break;
+			for(int z = ((int)transform.position.z + MovingPlatform.MoveRange); 
+					z < (m_TerrainData.size.z + transform.position.z) - MovingPlatform.MoveRange; z += m_ScanSquareExtent)
 			{
+				if(z + m_ScanSquareExtent > (m_TerrainData.size.z + transform.position.z) - MovingPlatform.MoveRange)
+					break;
 				if(Random.Range(0f, 100f) <= spawnChance)
 				{
 					GameObject platformToSpawn = null;
@@ -216,7 +223,8 @@ public class PlatformGenerator : MonoBehaviour
 					int randX = Random.Range(x + scanEmptySpace, (x + m_ScanSquareExtent) - scanEmptySpace);
 					int randZ = Random.Range(z + scanEmptySpace, (z + m_ScanSquareExtent) - scanEmptySpace);
 
-					var platform = Instantiate(platformToSpawn, new Vector3(randX, m_SkyLayerHeight, randZ), 
+					var platform = Instantiate(platformToSpawn, new Vector3(randX, m_SkyLayerHeight + 
+											   Random.Range(-m_SkyPlatformHeightVariance, m_SkyPlatformHeightVariance), randZ), 
 											   Quaternion.identity) as GameObject;
 					platform.transform.SetParent(skyPlatformContainer.transform);
 
